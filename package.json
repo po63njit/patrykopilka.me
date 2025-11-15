@@ -1,0 +1,14 @@
+{
+  "name": "patrykopilka-site",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "dev:api": "npm --prefix apps/api run dev",
+    "deploy:api": "npm --prefix apps/api run deploy"
+  }
+}

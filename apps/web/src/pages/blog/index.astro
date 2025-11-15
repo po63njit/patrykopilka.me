@@ -1,0 +1,196 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const rawPosts = await getCollection('blog');
+
+// normalise tags to lowercase
+const posts = rawPosts.map((post) => ({
+  ...post,
+  data: {
+    ...post.data,
+    tags: (post.data.tags ?? []).map((t) => t.toLowerCase()),
+  },
+}));
+
+const sorted = posts
+  .slice()
+  .sort(
+    (a, b) =>
+      new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  );
+
+const mainPost = sorted[0];
+const restPosts = sorted.slice(1);
+
+// Site topics -> which tag they pull from
+const topics = [
+  { label: 'Notes & Research', key: 'notes-research', tag: 'notes' },
+  { label: 'Fitness', key: 'fitness', tag: 'fitness' },
+  { label: 'Investing', key: 'investing', tag: 'investing' },
+  { label: 'Travel', key: 'travel', tag: 'travel' },
+];
+
+// Build data for each topic
+const categories = topics.map((topic) => {
+  const topicPosts = posts.filter((p) =>
+    p.data.tags.includes(topic.tag.toLowerCase()),
+  );
+  return { ...topic, posts: topicPosts };
+});
+
+const year = new Date().getFullYear();
+---
+
+
+
+<BaseLayout
+  title="Blog — patrykopilka.me"
+  description="Writing, notes, and experiments."
+>
+  <div class="blog-page">
+    {/* Top black bar with logo + tagline */}
+    <section class="blog-banner">
+  <div class="blog-banner-logo">
+    SIMPLY <span>PATRYK</span>
+  </div>
+  <p class="blog-banner-tagline">
+    Patrykverse, Anything that gets me on a deep dive I post here :)
+  </p>
+</section>
+
+
+    {/* Category strip like 1 / TRAVEL / year etc. */}
+    <section class="blog-nav-strip">
+  {categories.map((topic, index) => (
+    <a
+      href={`#topic-${topic.key}`}
+      class="blog-nav-item"
+    >
+      <span class="blog-nav-number">{index + 1}</span>
+      <span class="blog-nav-label">{topic.label}</span>
+      <span class="blog-nav-year">{year}</span>
+    </a>
+  ))}
+</section>
+
+
+
+    {/* Big hero section */}
+    <section class="blog-hero">
+      <div class="blog-hero-graphic" aria-hidden="true"></div>
+      <div class="blog-hero-overlay">
+        <p class="blog-hero-eyebrow">Latest</p>
+        <h1 class="blog-hero-title">
+          {mainPost ? mainPost.data.title : 'Nothing published… yet.'}
+        </h1>
+        {mainPost && (
+          <p class="blog-hero-meta">
+            {new Date(mainPost.data.date).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+            })}
+            {mainPost.data.tags && mainPost.data.tags.length > 0 && (
+              <>
+                {' · '}
+                <span>{mainPost.data.tags.join(', ')}</span>
+              </>
+            )}
+          </p>
+        )}
+      </div>
+    </section>
+
+    {/* Latest + sidebar layout */}
+    <section class="blog-main-wrap">
+      <div class="blog-main-feature">
+        <h2 class="blog-section-heading">Latest</h2>
+
+        {mainPost && (
+          <article class="blog-feature-card">
+            <a
+              href={`/blog/${mainPost.slug}`}
+              class="blog-feature-image"
+              aria-label={mainPost.data.title}
+            ></a>
+            <div class="blog-feature-body">
+              <h3 class="blog-feature-title">
+                <a href={`/blog/${mainPost.slug}`}>{mainPost.data.title}</a>
+              </h3>
+              <p class="blog-feature-meta">
+                {new Date(mainPost.data.date).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: '2-digit',
+                })}
+                {mainPost.data.tags && mainPost.data.tags.length > 0 && (
+                  <>
+                    {' · '}
+                    <span>{mainPost.data.tags.join(', ')}</span>
+                  </>
+                )}
+              </p>
+              {mainPost.data.description && (
+                <p class="blog-feature-excerpt">
+                  {mainPost.data.description}
+                </p>
+              )}
+            </div>
+          </article>
+        )}
+
+        {restPosts.length > 0 && (
+          <div class="blog-list-simple">
+            {restPosts.map((post) => (
+              <article class="blog-list-simple-item">
+                <h3 class="blog-list-simple-title">
+                  <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+                </h3>
+                <p class="blog-list-simple-meta">
+                  {new Date(post.data.date).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                  })}
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <>
+                      {' · '}
+                      <span>{post.data.tags.join(', ')}</span>
+                    </>
+                  )}
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <aside class="blog-main-aside">
+  {categories.map((topic) => (
+    <section
+      class="blog-cat-block"
+      id={`topic-${topic.key}`}
+    >
+      <h3 class="blog-cat-title">{topic.label}</h3>
+
+      {topic.posts.length ? (
+        <ul class="blog-cat-list">
+          {topic.posts.slice(0, 4).map((p) => (
+            <li>
+              <a href={`/blog/${p.slug}`}>{p.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="blog-item-meta">No posts in this topic yet.</p>
+      )}
+    </section>
+  ))}
+</aside>
+
+
+    </section>
+  </div>
+</BaseLayout>
+

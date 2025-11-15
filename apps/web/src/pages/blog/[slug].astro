@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Tell Astro which blog slugs exist at build time
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  return posts.map((post) => ({
+    params: { slug: post.slug }, // maps to [slug]
+    props: { post },             // passes post into the component
+  }));
+}
+
+// `post` comes from getStaticPaths via Astro.props
+const { post } = Astro.props;
+
+const { Content } = await post.render();
+const { title, date, tags = [], description } = post.data;
+---
+
+<BaseLayout
+  title={`${title} — patrykopilka.me`}
+  description={description ?? ''}
+>
+  <div class="blog-page">
+    <article class="blog-article">
+      <header class="blog-article-header">
+        <p class="blog-eyebrow">Post</p>
+        <h1 class="blog-article-title">{title}</h1>
+        <p class="blog-item-meta">
+          {new Date(date).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+          })}
+          {tags.length > 0 && (
+            <>
+              {' · '}
+              <span>{tags.join(', ')}</span>
+            </>
+          )}
+        </p>
+        {description && (
+          <p class="blog-article-description">{description}</p>
+        )}
+      </header>
+
+      <div class="blog-article-body">
+        <Content />
+      </div>
+    </article>
+  </div>
+</BaseLayout>
+

@@ -1,0 +1,25 @@
+name = "patrykopilka-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-10"
+
+# Optional resources you can create later:
+# [[kv_namespaces]]
+# binding = "BLOG_CACHE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[d1_databases]]
+# binding = "BLOG_DB"
+# database_name = "blog_db"
+# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "ASSETS"
+# bucket_name = "assets"
+
+[[durable_objects.bindings]]
+name = "COUNTER_DO"
+class_name = "CounterDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CounterDO"]

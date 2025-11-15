@@ -1,0 +1,33 @@
+---
+import '../styles/global.scss';
+
+const {
+  title = 'patrykopilka.me',
+  description = 'Personal site — blog, resume, experiments',
+} = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="/" class="brand">patrykopilka.me</a>
+      <nav>
+        <a href="/blog">Blog</a>
+        <a href="/resume">Resume</a>
+        <a href="/about">About</a>
+      </nav>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>© {new Date().getFullYear()} Patryk Opilka — built with Astro on Cloudflare Pages</p>
+    </footer>
+  </body>
+</html>
+

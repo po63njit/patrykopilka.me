@@ -1,0 +1,798 @@
+/* ===== Site fundamentals (header, cards, text) ===== */
+
+:root {
+  --maxw: 900px;
+  --pad: 1rem;
+  --bg: #05070b;
+  --fg: #e8eef2;
+  --muted: #9aa7b2;
+  --card: #0e141b;
+}
+
+/* SCSS color tokens used by bubbles & effects */
+$blk: #05070b;
+$white: #fff;
+$red: #d73a4d;
+$blue: #0323a0;
+$none: rgba($white, 0);
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu,
+    Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+
+  background: #000; // black space backdrop
+}
+
+.site-header,
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: var(--pad);
+}
+
+.site-header .brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.site-header nav a {
+  color: var(--muted);
+  margin-left: 1rem;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.site-header nav a:hover {
+  color: var(--fg);
+}
+
+.container {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: var(--pad);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid #141b2c;
+  border-radius: 16px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.muted {
+  color: var(--muted);
+}
+
+code,
+pre {
+  background: #0b1017;
+  border: 1px solid #141b2c;
+  border-radius: 10px;
+  padding: 0.25rem 0.5rem;
+}
+
+a {
+  color: #7dd3fc;
+}
+
+a:hover {
+  color: #bae6fd;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+/* === Rays background hero === */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Full-screen moving rays, behind everything */
+.a-rays {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200vh;
+  height: 200vw;
+  margin: 0;
+  transform: translate3d(-50%, -50%, 0) rotate(-70deg);
+  pointer-events: none;
+  z-index: 0;
+
+  /* black background, white rays */
+  background-image: repeating-linear-gradient(
+    50deg,
+    rgba(255, 255, 255, 0.95) 0,
+    rgba(255, 255, 255, 0.95) 24px,
+    rgba(255, 255, 255, 0) 24px,
+    rgba(255, 255, 255, 0) 80px
+  );
+}
+
+/* Hero content sits above the rays */
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1100px;
+  padding: 5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+/* keep header/footer above the rays too */
+.site-header,
+.site-footer {
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== Bubble nav (links styled as your bubbles) ===== */
+
+.bubble-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: none; /* only the bubbles themselves are clickable */
+}
+
+.bubble {
+  position: absolute;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  pointer-events: auto;
+
+  box-shadow:
+    8rem 8rem 4rem -6rem rgba(darken($red, 50%), 0.5),
+    8rem 8rem 4rem -2rem rgba(adjust-hue($red, -200deg), 0.1),
+    8rem 8rem 4rem -2rem rgba(lighten($red, 50%), 0.05),
+    inset 16rem 16rem 4rem -6rem rgba(darken($red, 50%), 0.1),
+    inset 16rem 16rem 4rem -2rem rgba(lighten($red, 50%), 0.1),
+    10rem 10rem 4rem rgba(magenta, 0.1);
+  filter: contrast(1.1);
+  backdrop-filter: blur(4px);
+
+  &,
+  &::before,
+  &::after {
+    border-radius: 50%;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset 2rem 0 5rem magenta,
+      inset 0 -2rem 5rem yellow,
+      inset 0 2rem 5rem blue,
+      inset -2rem 0 5rem cyan;
+    filter: contrast(1.5);
+    opacity: 0.7;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset -3rem -3rem 2rem rgba(adjust-hue($red, -200deg), 0.1),
+      inset 0 0 1rem adjust-hue($red, -200deg),
+      inset 4rem 4rem 5rem rgba(darken($red, 50%), 0.1);
+    filter: blur(0.5rem);
+    opacity: 0.9;
+    background:
+      radial-gradient(
+        at 40% 40%,
+        lighten($red, 50%),
+        rgba(lighten($red, 50%), 0.1) 25%,
+        $none 30%,
+        $none,
+        darken($red, 50%)
+      ),
+      radial-gradient(
+        at 45% 65%,
+        rgba(adjust-hue($red, -200deg), 0.1),
+        rgba(adjust-hue($red, -200deg), 0.1) 20%,
+        $none 30%,
+        $none
+      ),
+      radial-gradient(
+        at 65% 50%,
+        rgba(magenta, 0.1),
+        rgba(magenta, 0.1) 10%,
+        $none 12%,
+        $none
+      ),
+      radial-gradient(
+        at 70% 30%,
+        rgba(lighten($red, 50%), 0.5),
+        rgba(lighten($red, 50%), 0.1) 8%,
+        $none 10%,
+        $none,
+        $none
+      );
+    scale: 0.95;
+    transform: translate3d(-1.5rem, -1.5rem, 0);
+  }
+}
+
+.bubble span {
+  position: relative;
+  z-index: 1;
+  transform: translateY(1px);
+}
+
+/* position each bubble around the orb, away from the sphere */
+.bubble--blog {
+  transform: translate3d(-190%, -40%, 80px);
+}
+
+.bubble--resume {
+  transform: translate3d(190%, -10%, 80px);
+}
+
+.bubble--about {
+  transform: translate3d(0%, 190%, 80px);
+}
+
+/* floating animation */
+.bubble {
+  animation: bubble-float 6s ease-in-out infinite;
+}
+
+.bubble--blog {
+  animation-delay: -1s;
+}
+
+.bubble--resume {
+  animation-delay: -2.4s;
+}
+
+.bubble--about {
+  animation-delay: -4s;
+}
+
+@keyframes bubble-float {
+  0%,
+  100% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), 80px);
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--tx, 0) * 1.04),
+        calc(var(--ty, 0) * 0.96),
+        110px
+      );
+  }
+}
+
+/* let us tweak positions via CSS vars if needed later */
+.bubble--blog {
+  --tx: -190%;
+  --ty: -40%;
+}
+
+.bubble--resume {
+  --tx: 190%;
+  --ty: -10%;
+}
+
+.bubble--about {
+  --tx: 0%;
+  --ty: 190%;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .bubble {
+    width: 5.5rem;
+    height: 5.5rem;
+    font-size: 0.8rem;
+  }
+
+  .bubble--blog {
+    --tx: -155%;
+    --ty: -35%;
+  }
+
+  .bubble--resume {
+    --tx: 155%;
+    --ty: -5%;
+  }
+
+  .bubble--about {
+    --tx: 0%;
+    --ty: 155%;
+  }
+}
+
+/* ==== Blog layout & typography ==== */
+
+.blog-page {
+  background: #f9fafb;
+  color: #111827;
+  border-radius: 0.75rem;
+  padding-bottom: 3rem;
+  overflow: hidden;
+
+  a {
+    color: inherit;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Top black bar */
+
+.blog-banner {
+  background: #000;
+  color: #f9fafb;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.blog-banner-logo {
+  font-size: 1.4rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.blog-banner-logo span {
+  display: inline-block;
+  padding: 0.1rem 0.25rem;
+  background: linear-gradient(120deg, #22c55e, #0ea5e9);
+  color: #0b1020;
+  margin-left: 0.4rem;
+}
+
+.blog-banner-tagline {
+  font-size: 0.8rem;
+  max-width: 18rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* Category strip */
+
+.blog-nav-strip {
+  display: flex;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.4rem 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+}
+
+.blog-nav-item {
+  flex: 1;
+  text-align: center;
+  color: #111827;
+}
+
+.blog-nav-number {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.blog-nav-label {
+  display: block;
+}
+
+.blog-nav-year {
+  display: block;
+  font-size: 0.65rem;
+  color: #9ca3af;
+}
+
+/* Hero band */
+
+.blog-hero {
+  position: relative;
+  height: 260px;
+  margin: 0;
+  background:
+    radial-gradient(circle at 10% 0%, #f97316 0, transparent 45%),
+    radial-gradient(circle at 90% 100%, #22c55e 0, transparent 50%),
+    linear-gradient(135deg, #0f172a, #020617 65%, #111827);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 1.5rem 2.25rem;
+  color: #f9fafb;
+}
+
+.blog-hero-graphic {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  opacity: 0.3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 70%, rgba(59, 130, 246, 0.5), transparent 55%),
+    radial-gradient(circle at 75% 30%, rgba(244, 63, 94, 0.6), transparent 55%);
+}
+
+.blog-hero-overlay {
+  position: relative;
+  max-width: 28rem;
+}
+
+.blog-hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  margin: 0 0 0.2rem;
+  opacity: 0.9;
+}
+
+.blog-hero-title {
+  font-size: 1.8rem;
+  line-height: 1.15;
+  margin: 0 0 0.35rem;
+}
+
+.blog-hero-meta {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.blog-hero-meta span {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+/* Main layout: latest + sidebar */
+
+.blog-main-wrap {
+  max-width: 960px;
+  margin: 2.2rem auto 0;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  gap: 2.2rem;
+}
+
+.blog-section-heading {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin: 0 0 0.6rem;
+  position: relative;
+}
+
+.blog-section-heading::before,
+.blog-section-heading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #111827;
+  opacity: 0.4;
+}
+
+.blog-section-heading::before {
+  left: 0;
+  transform: translate(-105%, -50%);
+}
+
+.blog-section-heading::after {
+  right: 0;
+  transform: translate(105%, -50%);
+}
+
+/* Feature card (big latest image + text) */
+
+.blog-feature-card {
+  background: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.blog-feature-image {
+  display: block;
+  background:
+    radial-gradient(circle at 20% 20%, #0ea5e9, transparent 55%),
+    radial-gradient(circle at 85% 80%, #ef4444, transparent 60%),
+    linear-gradient(135deg, #020617, #1d4ed8);
+  padding-top: 60%;
+}
+
+.blog-feature-body {
+  padding: 1rem 1.1rem 1.25rem;
+}
+
+.blog-feature-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.blog-feature-meta {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0 0 0.55rem;
+}
+
+.blog-feature-excerpt {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* Remaining posts list on the left */
+
+.blog-list-simple {
+  margin-top: 1.4rem;
+}
+
+.blog-list-simple-item {
+  padding: 0.55rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.blog-list-simple-item:first-child {
+  border-top: none;
+}
+
+.blog-list-simple-title {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.blog-list-simple-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Sidebar categories */
+
+.blog-main-aside {
+  font-size: 0.85rem;
+}
+
+.blog-cat-block + .blog-cat-block {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.blog-cat-title {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.78rem;
+  margin: 0 0 0.6rem;
+}
+
+.blog-cat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.blog-cat-list li + li {
+  margin-top: 0.35rem;
+}
+
+.blog-cat-list a {
+  text-decoration: none;
+}
+
+/* Single article page */
+
+.blog-article {
+  max-width: 780px;
+  margin: 2rem auto 3rem auto;
+  padding: 0 1.5rem 2rem 1.5rem;
+}
+
+.blog-article-header {
+  margin-bottom: 1.8rem;
+}
+
+.blog-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  margin: 0 0 0.4rem;
+  color: #6b7280;
+}
+
+.blog-article-title {
+  font-size: clamp(2rem, 2.6vw, 2.5rem);
+  margin: 0 0 0.4rem;
+}
+
+.blog-item-meta {
+  margin: 0 0 0.45rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.blog-article-description {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.blog-article-body {
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.blog-article-body p {
+  margin: 0 0 1rem;
+}
+
+.blog-article-body h2 {
+  margin: 1.8rem 0 0.6rem;
+  font-size: 1.3rem;
+}
+
+.blog-article-body h3 {
+  margin: 1.4rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Responsive for smaller screens */
+
+@media (max-width: 768px) {
+  .blog-main-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .blog-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .blog-banner-tagline {
+    max-width: none;
+  }
+
+  .blog-hero {
+    height: auto;
+    padding: 1.25rem 1.4rem 1.6rem;
+  }
+}
+
+/* === Artemis / POLSA-inspired color pass for blog === */
+
+/* Deepen the banner into a navy space bar */
+.blog-banner {
+  background:
+    radial-gradient(circle at left, #0b1120 0, #020617 55%);
+  color: #e5e7eb;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.8);
+}
+
+.blog-banner-logo {
+  letter-spacing: 0.28em;
+}
+
+.blog-banner-logo span {
+  background: linear-gradient(120deg, #0ea5e9, #6366f1);
+  color: #020617;
+}
+
+.blog-banner-tagline {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* Make the nav strip feel more “instrument panel” */
+.blog-nav-strip {
+  background: #020617;
+  border-bottom: 1px solid rgba(30, 64, 175, 0.6);
+}
+
+.blog-nav-item {
+  color: #e5e7eb;
+  text-decoration: none;
+  padding: 0.45rem 0 0.4rem;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.blog-nav-item:hover,
+.blog-nav-item:focus-visible {
+  color: #38bdf8; /* bright cyan */
+  background: radial-gradient(
+    circle at center,
+    rgba(56, 189, 248, 0.2),
+    transparent 65%
+  );
+  transform: translateY(-1px);
+}
+
+.blog-nav-number {
+  color: #e5e7eb;
+}
+
+.blog-nav-year {
+  color: #64748b;
+}
+
+.blog-nav-label {
+  font-weight: 600;
+}
+
+/* Sidebar & cards */
+.blog-cat-list a,
+.blog-feature-title a,
+.blog-list-simple-title a {
+  color: #111827;
+  text-decoration: none;
+}
+
+.blog-cat-list a:hover,
+.blog-feature-title a:hover,
+.blog-list-simple-title a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Links inside article body */
+.blog-article-body a {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
