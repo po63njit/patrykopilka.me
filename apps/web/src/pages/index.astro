@@ -28,9 +28,10 @@ const latestPosts = posts
   <div class="hero-inner">
     <canvas class="ferro-canvas" aria-hidden="true"></canvas>
     <nav class="planet-nav" aria-label="Main sections">
-      <SaturnLink href="/blog" label="Blog" className="planet-link--blog" />
-      <SaturnLink href="/resume" label="Resume" className="planet-link--resume" />
-      <SaturnLink href="/about" label="About" className="planet-link--about" />
+      <SaturnLink href="/blog" label="Blog" variant="earth" className="planet-link--blog" />
+      <SaturnLink href="/resume" label="Resume" variant="venus" className="planet-link--resume" />
+      <SaturnLink href="/about" label="About" variant="saturn" className="planet-link--about" />
+      <SaturnLink href="/projects" label="Projects" variant="jupiter" className="planet-link--projects" />
     </nav>
 
     <p class="hero-tagline">
@@ -186,12 +187,20 @@ const latestPosts = posts
       this.resize = this.resize.bind(this);
       this.handlePointer = this.handlePointer.bind(this);
       this.handleClick = this.handleClick.bind(this);
+      this.handleTouch = this.handleTouch.bind(this);
+      this.handlePlanetActivate = this.handlePlanetActivate.bind(this);
       this.tick = this.tick.bind(this);
 
       this.resize();
       window.addEventListener("resize", this.resize);
       this.hero.addEventListener("pointermove", this.handlePointer);
       this.hero.addEventListener("pointerdown", this.handleClick);
+      this.hero.addEventListener("touchstart", this.handleTouch, { passive: true });
+      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
+        planet.addEventListener("pointerdown", this.handlePlanetActivate);
+        planet.addEventListener("touchstart", this.handlePlanetActivate, { passive: true });
+        planet.addEventListener("focus", this.handlePlanetActivate);
+      });
       requestAnimationFrame(this.tick);
     }
 
@@ -232,6 +241,33 @@ const latestPosts = posts
         y: event.clientY - heroRect.top,
       };
       this.targetStrength = 1.4;
+    }
+
+    handleTouch(event) {
+      const touch = event.touches && event.touches[0];
+      if (!touch) return;
+
+      const heroRect = this.hero.getBoundingClientRect();
+      this.magnet = {
+        x: touch.clientX - heroRect.left,
+        y: touch.clientY - heroRect.top,
+      };
+      this.targetStrength = 1.45;
+    }
+
+    handlePlanetActivate(event) {
+      const target = event.currentTarget instanceof Element
+        ? event.currentTarget
+        : null;
+      if (!target) return;
+
+      const heroRect = this.hero.getBoundingClientRect();
+      const rect = target.getBoundingClientRect();
+      this.magnet = {
+        x: rect.left + rect.width / 2 - heroRect.left,
+        y: rect.top + rect.height / 2 - heroRect.top,
+      };
+      this.targetStrength = 1.35;
     }
 
     tick() {
@@ -286,23 +322,62 @@ const latestPosts = posts
       }
       ctx.closePath();
 
-      const grad = ctx.createRadialGradient(
-        this.center.x - this.baseRadius * 0.4,
-        this.center.y - this.baseRadius * 0.5,
-        this.baseRadius * 0.18,
+      const bodyGrad = ctx.createRadialGradient(
+        this.center.x - this.baseRadius * 0.45,
+        this.center.y - this.baseRadius * 0.52,
+        this.baseRadius * 0.14,
         this.center.x,
-        this.center.y,
-        this.baseRadius * 1.4,
+        this.center.y + this.baseRadius * 0.15,
+        this.baseRadius * 1.35,
       );
-      grad.addColorStop(0, "#2a2a2a");
-      grad.addColorStop(0.35, "#0f0f0f");
-      grad.addColorStop(1, "#020202");
-      ctx.fillStyle = grad;
+      bodyGrad.addColorStop(0, "#1a1a1a");
+      bodyGrad.addColorStop(0.25, "#050505");
+      bodyGrad.addColorStop(0.65, "#010101");
+      bodyGrad.addColorStop(1, "#000000");
+      ctx.fillStyle = bodyGrad;
       ctx.fill();
 
-      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      const rimGrad = ctx.createLinearGradient(
+        this.center.x - this.baseRadius,
+        this.center.y - this.baseRadius,
+        this.center.x + this.baseRadius,
+        this.center.y + this.baseRadius,
+      );
+      rimGrad.addColorStop(0, "rgba(255,255,255,0.18)");
+      rimGrad.addColorStop(0.5, "rgba(255,255,255,0.03)");
+      rimGrad.addColorStop(1, "rgba(0,0,0,0.55)");
+      ctx.strokeStyle = rimGrad;
       ctx.lineWidth = 1.2;
       ctx.stroke();
+
+      const coreShade = ctx.createRadialGradient(
+        this.center.x + this.baseRadius * 0.15,
+        this.center.y + this.baseRadius * 0.25,
+        this.baseRadius * 0.2,
+        this.center.x,
+        this.center.y,
+        this.baseRadius * 1.2,
+      );
+      coreShade.addColorStop(0, "rgba(0,0,0,0)");
+      coreShade.addColorStop(1, "rgba(0,0,0,0.7)");
+      ctx.fillStyle = coreShade;
+      ctx.fill();
+
+      const highlight = ctx.createRadialGradient(
+        this.center.x - this.baseRadius * 0.36,
+        this.center.y - this.baseRadius * 0.4,
+        this.baseRadius * 0.08,
+        this.center.x - this.baseRadius * 0.3,
+        this.center.y - this.baseRadius * 0.35,
+        this.baseRadius * 0.52,
+      );
+      highlight.addColorStop(0, "rgba(255,255,255,0.24)");
+      highlight.addColorStop(0.45, "rgba(255,255,255,0.08)");
+      highlight.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.globalCompositeOperation = "screen";
+      ctx.fillStyle = highlight;
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
     }
   }
 </script>

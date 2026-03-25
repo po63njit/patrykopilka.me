@@ -164,7 +164,7 @@ h3 {
 .planet-nav {
   position: relative;
   width: min(800px, 100%);
-  min-height: 350px;
+  min-height: 460px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,47 +203,67 @@ h3 {
   transform: translate3d(var(--tx), var(--ty), 0) scale(1.07);
 }
 
-.planet-link .saturn {
+.planet-link .planet-svg {
   width: 185px;
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.35));
 }
 
-.planet-link .planet-body circle {
+.planet-link .planet-svg--saturn .planet-body circle {
   fill: #aec7ff;
 }
 
-.planet-link .planet-body path {
+.planet-link .planet-svg--saturn .planet-body path {
   fill: #a1bbf5;
 }
 
-.planet-link .belt-front path,
-.planet-link .belt-back path {
+.planet-link .planet-svg--saturn .belt-front path,
+.planet-link .planet-svg--saturn .belt-back path {
   fill: #ffb0b0;
 }
 
-.planet-link .stars-front path,
-.planet-link .stars-back path {
+.planet-link .planet-svg--saturn .stars-front path,
+.planet-link .planet-svg--saturn .stars-back path {
   fill: #fff;
+}
+
+.planet-link .planet-svg--earth .clouds ellipse {
+  fill: rgba(231, 247, 255, 0.9);
+}
+
+.planet-link .planet-svg--venus .venus-clouds path {
+  fill: #ffd6ba;
+  opacity: 0.92;
+}
+
+.planet-link .planet-svg--jupiter .jupiter-clouds path {
+  fill: #ffe5cf;
+  opacity: 0.9;
 }
 
 .planet-link--blog {
   --tx: -180%;
-  --ty: -20%;
+  --ty: -38%;
   animation-delay: -0.8s;
 }
 
 .planet-link--resume {
   --tx: 180%;
-  --ty: -5%;
+  --ty: -38%;
   animation-delay: -2.1s;
 }
 
 .planet-link--about {
-  --tx: 0%;
-  --ty: 165%;
+  --tx: -105%;
+  --ty: 112%;
   animation-delay: -3.8s;
+}
+
+.planet-link--projects {
+  --tx: 105%;
+  --ty: 112%;
+  animation-delay: -1.6s;
 }
 
 @keyframes planet-float {
@@ -258,26 +278,31 @@ h3 {
 
 @media (max-width: 720px) {
   .planet-nav {
-    min-height: 420px;
+    min-height: 500px;
   }
 
-  .planet-link .saturn {
+  .planet-link .planet-svg {
     width: 145px;
   }
 
   .planet-link--blog {
-    --tx: -95%;
-    --ty: -35%;
+    --tx: -68%;
+    --ty: -48%;
   }
 
   .planet-link--resume {
-    --tx: 95%;
-    --ty: -25%;
+    --tx: 68%;
+    --ty: -48%;
   }
 
   .planet-link--about {
-    --tx: 0%;
-    --ty: 120%;
+    --tx: -68%;
+    --ty: 88%;
+  }
+
+  .planet-link--projects {
+    --tx: 68%;
+    --ty: 88%;
   }
 }
 
