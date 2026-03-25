@@ -48,15 +48,106 @@ body {
   color: var(--fg);
 }
 
-.site-header nav a {
-  color: var(--muted);
-  margin-left: 1rem;
-  text-decoration: none;
-  font-size: 0.95rem;
+.retro-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.16rem;
+  color: #67ff9a;
+  text-transform: uppercase;
+  text-shadow: 0 0 4px rgba(95, 255, 140, 0.9), 0 0 10px rgba(39, 197, 88, 0.75);
 }
 
-.site-header nav a:hover {
-  color: var(--fg);
+.retro-nav__edge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.retro-nav a {
+  min-width: 7.35rem;
+  padding: 0.18rem 0.6rem;
+  border: 1px solid rgba(0, 135, 43, 0.85);
+  color: #67ff9a;
+  text-decoration: none;
+  text-align: center;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(31, 255, 132, 0.15),
+      rgba(0, 71, 26, 0.08)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 255, 90, 0.09) 0,
+      rgba(0, 255, 90, 0.09) 1px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0) 4px
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(4, 51, 14, 0.7),
+    0 0 8px rgba(0, 255, 90, 0.2);
+  transition: border-color 120ms linear, box-shadow 120ms linear,
+    background-color 120ms linear;
+}
+
+.retro-nav a:hover,
+.retro-nav a:focus-visible {
+  border-color: #40ff87;
+  box-shadow:
+    inset 0 0 0 1px rgba(44, 168, 80, 0.4),
+    0 0 14px rgba(64, 255, 135, 0.55);
+  outline: none;
+}
+
+@media (max-width: 840px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  .retro-nav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.32rem;
+  }
+
+  .retro-nav a {
+    min-width: 0;
+    flex: 1 1 calc(50% - 0.4rem);
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-header {
+    align-items: center;
+  }
+
+  .retro-nav {
+    justify-content: center;
+  }
+
+  .retro-nav__edge {
+    width: auto;
+    padding: 0 0.2rem;
+    font-size: 1.4rem;
+  }
+
+  .retro-nav a {
+    flex-basis: calc(100% - 0.4rem);
+    width: 100%;
+    font-size: 0.88rem;
+    letter-spacing: 0.045em;
+  }
 }
 
 .container {
