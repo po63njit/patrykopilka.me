@@ -2,11 +2,65 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="About — patrykopilka.me">
-  <h1>About</h1>
-  <section class="card">
-    <p>
-      This is my playground for writing, experiments, and side projects in
-      systems, hardware, and whatever else I feel like hacking on.
-    </p>
+  <section class="about-solar card">
+    <div class="about-solar__left">
+      <p class="about-solar__eyebrow">About Me</p>
+      <h1 class="about-solar__title">
+        Crafting
+        <em>regenerative</em>
+        digital worlds
+      </h1>
+      <p class="about-solar__intro">
+        Computer Engineering student building from the metal up: RISC-V, GNSS,
+        ML, and weird systems and hardware experiments.
+      </p>
+      <div class="about-solar__stats" aria-label="At a glance">
+        <article>
+          <p class="about-solar__stat-value">3+</p>
+          <p class="about-solar__stat-label">Years building</p>
+        </article>
+        <article>
+          <p class="about-solar__stat-value">40+</p>
+          <p class="about-solar__stat-label">Projects shipped</p>
+        </article>
+        <article>
+          <p class="about-solar__stat-value">15+</p>
+          <p class="about-solar__stat-label">Hardware builds</p>
+        </article>
+        <article>
+          <p class="about-solar__stat-value">8+</p>
+          <p class="about-solar__stat-label">Core technologies</p>
+        </article>
+      </div>
+    </div>
+    <div class="about-solar__right">
+      <section>
+        <h2>Frontend</h2>
+        <ul>
+          <li>Astro</li>
+          <li>TypeScript</li>
+          <li>SCSS</li>
+          <li>Three.js</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Backend</h2>
+        <ul>
+          <li>Cloudflare Workers</li>
+          <li>Node.js</li>
+          <li>APIs</li>
+          <li>Systems programming</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Infrastructure</h2>
+        <ul>
+          <li>Linux</li>
+          <li>CI/CD</li>
+          <li>Edge deployment</li>
+          <li>Observability</li>
+        </ul>
+      </section>
+    </div>
   </section>
 </BaseLayout>
