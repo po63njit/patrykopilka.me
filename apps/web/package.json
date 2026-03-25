@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.10",
-    "astro": "^5.15.5"
+    "astro": "^5.15.5",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "sass": "^1.94.0",
