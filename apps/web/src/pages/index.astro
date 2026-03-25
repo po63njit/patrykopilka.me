@@ -34,10 +34,7 @@ const latestPosts = posts
       <SaturnLink href="/projects" label="Projects" variant="jupiter" className="planet-link--projects" />
     </nav>
 
-    <p class="hero-tagline">
-      Computer Engineering student building from the metal up: RISC-V, GNSS,
-      ML, and weird systems and hardware experiments.
-      <br />
+    <div class="hero-actions">
       {apiBase ? (
         <a
           href={`${apiBase}/health`}
@@ -52,7 +49,7 @@ const latestPosts = posts
           Set PUBLIC_API_BASE to enable API link.
         </span>
       )}
-    </p>
+    </div>
   </div>
 </section>
 
