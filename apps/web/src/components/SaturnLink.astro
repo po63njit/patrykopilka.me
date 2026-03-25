@@ -1,34 +1,107 @@
 ---
-const { href, label, className = '' } = Astro.props;
+const { href, label, className = '', variant = 'saturn' } = Astro.props;
 ---
 
 <a href={href} class={`planet-link ${className}`.trim()}>
-  <svg
-    viewBox="0 0 161.7 111.6"
-    class="saturn"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <g class="stars-back">
-      <path d="M31.3,90l2.2-2.2l2.2,2.2l-2.2,2.2L31.3,90z" />
-      <path d="M7.2,108l2.2-2.2l2.2,2.2l-2.2,2.2L7.2,108z" />
-      <path d="M31.3,106.5l2.2-2.2l2.2,2.2l-2.2,2.2L31.3,106.5z" />
-    </g>
-    <g class="belt-back">
-      <path d="M150.6,42.5C150.6,42.4,150.6,42.4,150.6,42.5c-0.9-3.7-6.3-7.3-31.1-4.5c-29.2,3.9-56.9,10.8-83.1,20.7 c-23.2,9.2-26.2,14.9-25.3,18.5c0,0,0,0.1,0,0.1l6.8-1.7c0,0-0.1,0-0.2-0.1c1.2-1.4,4.6-4.8,19-10.5c28.3-11,56.9-18.3,85.6-21.3 c15.4-1.7,20-0.3,21.7,0.3c0,0,0,0,0,0L150.6,42.5z" />
-    </g>
-    <g class="planet-body">
-      <circle cx="83.6" cy="55.8" r="44" />
-      <path d="M124.1,37.9C139.3,88,94.3,98.5,94.3,98.5s35.8-23.1,30.1-58C124.4,39.6,124.3,38.8,124.1,37.9z" />
-    </g>
-    <g class="belt-front">
-      <path d="M35.9,82.5c13.3-1.1,30.5-4.1,48.5-8.6c18-4.5,34.6-9.9,46.8-15.1c18.7-8.1,20.2-12.9,19.4-16.3l-6.7,1.7 c-1.2,1.3-5.2,4.6-17.6,9.8c-14.2,5.6-28.7,10.2-43.5,13.8c-14.7,3.8-29.7,6.5-44.9,8.2c-13.2,1.3-18.3,0.3-20-0.3l-6.8,1.7 C12,80.6,15.7,84.1,35.9,82.5z" />
-    </g>
-    <g class="stars-front">
-      <path d="M117,15.3l3.1-3.1l3.1,3.1l-3.1,3.1L117,15.3z" />
-      <path d="M132.5,19.8l3.1-3.1l3.1,3.1l-3.1,3.1L132.5,19.8z" />
-      <path d="M149.5,35.7l5.3-5.3l5.3,5.3l-5.3,5.3L149.5,35.7z" />
-    </g>
-  </svg>
+  {variant === 'earth' ? (
+    <svg
+      viewBox="0 0 180 180"
+      class="planet-svg planet-svg--earth"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="earthShade" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#7ed6ff" />
+          <stop offset="70%" stop-color="#32a6f6" />
+          <stop offset="100%" stop-color="#1d6ec4" />
+        </radialGradient>
+      </defs>
+      <circle cx="90" cy="90" r="64" fill="url(#earthShade)" />
+      <path d="M42 76c8-18 24-24 45-28 12 1 18 10 14 22-8 11-18 18-33 20-16 2-24-5-26-14z" fill="#74d64f" />
+      <path d="M93 105c8-7 20-8 31-2 7 7 4 16-6 22-12 3-23 0-31-8-3-4-2-8 6-12z" fill="#8de46b" />
+      <path d="M59 110c-12 1-21 8-22 18 8 8 20 10 31 2 6-8 4-17-9-20z" fill="#9de978" />
+      <g class="clouds">
+        <ellipse cx="67" cy="70" rx="24" ry="8" />
+        <ellipse cx="111" cy="89" rx="30" ry="9" />
+        <ellipse cx="84" cy="123" rx="22" ry="7" />
+      </g>
+    </svg>
+  ) : variant === 'venus' ? (
+    <svg
+      viewBox="0 0 180 180"
+      class="planet-svg planet-svg--venus"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="venusShade" cx="35%" cy="28%" r="72%">
+          <stop offset="0%" stop-color="#ffd49f" />
+          <stop offset="60%" stop-color="#ff9c2f" />
+          <stop offset="100%" stop-color="#d86a10" />
+        </radialGradient>
+      </defs>
+      <circle cx="90" cy="90" r="64" fill="url(#venusShade)" />
+      <path d="M38 78c12-16 42-30 66-25 17 3 29 11 38 23-8 4-17 7-28 8-25 4-54 1-76-6z" fill="#ffb242" />
+      <path d="M51 102c16-10 46-10 71-4 13 3 22 8 26 15-12 9-30 15-50 16-22 1-40-7-47-27z" fill="#ff8b1a" />
+      <path d="M72 54c14-7 31-8 49-4 8 2 12 5 14 10-17 7-43 8-63 5-8-2-10-6 0-11z" fill="#ffe1bf" opacity="0.85" />
+      <g class="venus-clouds">
+        <path d="M29 103c4-8 14-12 24-10 7 2 12 7 11 14-4 9-14 13-24 11-8-2-13-8-11-15z" />
+        <path d="M123 48c5-6 14-8 22-5 7 3 10 9 8 16-5 6-14 9-22 6-7-3-10-10-8-17z" />
+        <path d="M121 118c9-5 20-4 28 2 5 5 6 12 1 18-9 5-20 5-28-1-6-5-7-13-1-19z" />
+      </g>
+    </svg>
+  ) : variant === 'jupiter' ? (
+    <svg
+      viewBox="0 0 180 180"
+      class="planet-svg planet-svg--jupiter"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="jupiterShade" cx="36%" cy="28%" r="72%">
+          <stop offset="0%" stop-color="#ffe1be" />
+          <stop offset="62%" stop-color="#ffc77f" />
+          <stop offset="100%" stop-color="#dd9340" />
+        </radialGradient>
+      </defs>
+      <circle cx="90" cy="90" r="64" fill="url(#jupiterShade)" />
+      <path d="M31 74c19-14 43-18 68-16 17 1 34 7 50 18-16 9-37 14-58 15-26 1-45-6-60-17z" fill="#ffd2a2" />
+      <path d="M36 103c18-10 43-12 66-11 17 1 33 5 45 14-15 13-37 20-60 20-22 1-40-8-51-23z" fill="#ffb86d" />
+      <path d="M62 92c7-5 16-6 24-2 4 3 5 8 1 12-7 5-16 6-24 2-5-3-5-8-1-12z" fill="#ff972f" />
+      <g class="jupiter-clouds">
+        <path d="M28 98c6-8 17-10 27-5 7 4 10 11 7 18-7 8-18 9-28 5-7-4-10-11-6-18z" />
+        <path d="M120 57c9-6 21-6 30 0 6 5 7 12 2 18-10 7-22 7-31 0-6-4-7-12-1-18z" />
+      </g>
+    </svg>
+  ) : (
+    <svg
+      viewBox="0 0 161.7 111.6"
+      class="planet-svg planet-svg--saturn"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <g class="stars-back">
+        <path d="M31.3,90l2.2-2.2l2.2,2.2l-2.2,2.2L31.3,90z" />
+        <path d="M7.2,108l2.2-2.2l2.2,2.2l-2.2,2.2L7.2,108z" />
+        <path d="M31.3,106.5l2.2-2.2l2.2,2.2l-2.2,2.2L31.3,106.5z" />
+      </g>
+      <g class="belt-back">
+        <path d="M150.6,42.5C150.6,42.4,150.6,42.4,150.6,42.5c-0.9-3.7-6.3-7.3-31.1-4.5c-29.2,3.9-56.9,10.8-83.1,20.7 c-23.2,9.2-26.2,14.9-25.3,18.5c0,0,0,0.1,0,0.1l6.8-1.7c0,0-0.1,0-0.2-0.1c1.2-1.4,4.6-4.8,19-10.5c28.3-11,56.9-18.3,85.6-21.3 c15.4-1.7,20-0.3,21.7,0.3c0,0,0,0,0,0L150.6,42.5z" />
+      </g>
+      <g class="planet-body">
+        <circle cx="83.6" cy="55.8" r="44" />
+        <path d="M124.1,37.9C139.3,88,94.3,98.5,94.3,98.5s35.8-23.1,30.1-58C124.4,39.6,124.3,38.8,124.1,37.9z" />
+      </g>
+      <g class="belt-front">
+        <path d="M35.9,82.5c13.3-1.1,30.5-4.1,48.5-8.6c18-4.5,34.6-9.9,46.8-15.1c18.7-8.1,20.2-12.9,19.4-16.3l-6.7,1.7 c-1.2,1.3-5.2,4.6-17.6,9.8c-14.2,5.6-28.7,10.2-43.5,13.8c-14.7,3.8-29.7,6.5-44.9,8.2c-13.2,1.3-18.3,0.3-20-0.3l-6.8,1.7 C12,80.6,15.7,84.1,35.9,82.5z" />
+      </g>
+      <g class="stars-front">
+        <path d="M117,15.3l3.1-3.1l3.1,3.1l-3.1,3.1L117,15.3z" />
+        <path d="M132.5,19.8l3.1-3.1l3.1,3.1l-3.1,3.1L132.5,19.8z" />
+        <path d="M149.5,35.7l5.3-5.3l5.3,5.3l-5.3,5.3L149.5,35.7z" />
+      </g>
+    </svg>
+  )}
   <span>{label}</span>
 </a>
