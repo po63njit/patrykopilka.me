@@ -4,7 +4,6 @@ import { getCollection } from 'astro:content';
 
 const rawPosts = await getCollection('blog');
 
-// normalise tags to lowercase
 const posts = rawPosts.map((post) => ({
   ...post,
   data: {
@@ -21,62 +20,64 @@ const sorted = posts
   );
 
 const mainPost = sorted[0];
-const restPosts = sorted.slice(1);
 
-// Site topics -> which tag they pull from
 const topics = [
-  { label: 'Notes & Research', key: 'notes-research', tag: 'notes' },
-  { label: 'Fitness', key: 'fitness', tag: 'fitness' },
-  { label: 'Investing', key: 'investing', tag: 'investing' },
-  { label: 'Travel', key: 'travel', tag: 'travel' },
+  {
+    label: 'Notes & Research',
+    key: 'notes-research',
+    tag: 'notes',
+    subtitle: 'Deep dives and frameworks',
+  },
+  {
+    label: 'Fitness',
+    key: 'fitness',
+    tag: 'fitness',
+    subtitle: 'Training, recovery, routines',
+  },
+  {
+    label: 'Investing',
+    key: 'investing',
+    tag: 'investing',
+    subtitle: 'Process over predictions',
+  },
+  {
+    label: 'Travel',
+    key: 'travel',
+    tag: 'travel',
+    subtitle: 'Places, itineraries, lessons',
+  },
 ];
 
-// Build data for each topic
 const categories = topics.map((topic) => {
-  const topicPosts = posts.filter((p) =>
+  const topicPosts = sorted.filter((p) =>
     p.data.tags.includes(topic.tag.toLowerCase()),
   );
-  return { ...topic, posts: topicPosts };
+
+  return {
+    ...topic,
+    posts: topicPosts,
+    leadPost: topicPosts[0],
+    morePosts: topicPosts.slice(1, 6),
+  };
 });
 
 const year = new Date().getFullYear();
 ---
-
-
 
 <BaseLayout
   title="Blog — patrykopilka.me"
   description="Writing, notes, and experiments."
 >
   <div class="blog-page">
-    {/* Top black bar with logo + tagline */}
     <section class="blog-banner">
-  <div class="blog-banner-logo">
-    SIMPLY <span>PATRYK</span>
-  </div>
-  <p class="blog-banner-tagline">
-    Patrykverse — anything that sends me down a deep dive gets posted here.
-  </p>
-</section>
+      <div class="blog-banner-logo">
+        SIMPLY <span>PATRYK</span>
+      </div>
+      <p class="blog-banner-tagline">
+        Patrykverse — anything that sends me down a deep dive gets posted here.
+      </p>
+    </section>
 
-
-    {/* Category strip like 1 / TRAVEL / year etc. */}
-    <section class="blog-nav-strip">
-  {categories.map((topic, index) => (
-    <a
-      href={`#topic-${topic.key}`}
-      class="blog-nav-item"
-    >
-      <span class="blog-nav-number">{index + 1}</span>
-      <span class="blog-nav-label">{topic.label}</span>
-      <span class="blog-nav-year">{year} · {topic.posts.length} post{topic.posts.length === 1 ? '' : 's'}</span>
-    </a>
-  ))}
-</section>
-
-
-
-    {/* Big hero section */}
     <section class="blog-hero">
       <div class="blog-hero-graphic" aria-hidden="true"></div>
       <div class="blog-hero-overlay">
@@ -102,94 +103,107 @@ const year = new Date().getFullYear();
       </div>
     </section>
 
-    {/* Latest + sidebar layout */}
-    <section class="blog-main-wrap">
-      <div class="blog-main-feature">
-        <h2 class="blog-section-heading">Latest</h2>
+    <section class="blog-topic-shell" aria-label="Blog categories">
+      <nav class="blog-topic-nav" aria-label="Post categories">
+        <div class="blog-topic-nav-header">
+          <h2>Blog Control</h2>
+          <p>{year} editions</p>
+        </div>
 
-        {mainPost && (
-          <article class="blog-feature-card">
-            <a
-              href={`/blog/${mainPost.slug}`}
-              class="blog-feature-image"
-              aria-label={mainPost.data.title}
-            ></a>
-            <div class="blog-feature-body">
-              <h3 class="blog-feature-title">
-                <a href={`/blog/${mainPost.slug}`}>{mainPost.data.title}</a>
-              </h3>
-              <p class="blog-feature-meta">
-                {new Date(mainPost.data.date).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: '2-digit',
-                })}
-                {mainPost.data.tags && mainPost.data.tags.length > 0 && (
-                  <>
-                    {' · '}
-                    <span>{mainPost.data.tags.join(', ')}</span>
-                  </>
-                )}
-              </p>
-              {mainPost.data.description && (
-                <p class="blog-feature-excerpt">
-                  {mainPost.data.description}
-                </p>
-              )}
-            </div>
-          </article>
-        )}
+        {categories.map((topic, index) => (
+          <button
+            class={`blog-topic-btn ${index === 0 ? 'active' : ''}`}
+            type="button"
+            data-topic-btn={topic.key}
+            aria-controls={`topic-panel-${topic.key}`}
+            aria-selected={index === 0 ? 'true' : 'false'}
+            role="tab"
+          >
+            <span class="blog-topic-btn-index">{String(index + 1).padStart(2, '0')}</span>
+            <span class="blog-topic-btn-copy">
+              <span class="blog-topic-btn-title">{topic.label}</span>
+              <span class="blog-topic-btn-subtitle">{topic.subtitle}</span>
+            </span>
+            <span class="blog-topic-btn-count">{topic.posts.length}</span>
+          </button>
+        ))}
+      </nav>
 
-        {restPosts.length > 0 && (
-          <div class="blog-list-simple">
-            {restPosts.map((post) => (
-              <article class="blog-list-simple-item">
-                <h3 class="blog-list-simple-title">
-                  <a href={`/blog/${post.slug}`}>{post.data.title}</a>
-                </h3>
-                <p class="blog-list-simple-meta">
-                  {new Date(post.data.date).toLocaleDateString(undefined, {
+      <div class="blog-topic-panels">
+        {categories.map((topic, index) => (
+          <section
+            class={`blog-topic-panel ${index === 0 ? 'active' : ''}`}
+            id={`topic-panel-${topic.key}`}
+            data-topic-panel={topic.key}
+            role="tabpanel"
+          >
+            <header class="blog-topic-panel-header">
+              <p class="blog-topic-panel-kicker">{topic.tag}</p>
+              <h2>{topic.label}</h2>
+              <p>{topic.subtitle} · {topic.posts.length} post{topic.posts.length === 1 ? '' : 's'}.</p>
+            </header>
+
+            {topic.leadPost ? (
+              <article class="blog-topic-lead">
+                <h3><a href={`/blog/${topic.leadPost.slug}`}>{topic.leadPost.data.title}</a></h3>
+                <p class="blog-item-meta">
+                  {new Date(topic.leadPost.data.date).toLocaleDateString(undefined, {
                     year: 'numeric',
                     month: 'short',
                     day: '2-digit',
                   })}
-                  {post.data.tags && post.data.tags.length > 0 && (
-                    <>
-                      {' · '}
-                      <span>{post.data.tags.join(', ')}</span>
-                    </>
-                  )}
                 </p>
+                {topic.leadPost.data.description && (
+                  <p class="blog-topic-lead-excerpt">{topic.leadPost.data.description}</p>
+                )}
               </article>
-            ))}
-          </div>
-        )}
+            ) : (
+              <p class="blog-item-meta">No posts in this category yet. New notes soon.</p>
+            )}
+
+            {topic.morePosts.length > 0 && (
+              <ul class="blog-topic-list">
+                {topic.morePosts.map((post) => (
+                  <li>
+                    <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+                    <span>
+                      {new Date(post.data.date).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
       </div>
-
-      <aside class="blog-main-aside">
-  {categories.map((topic) => (
-    <section
-      class="blog-cat-block"
-      id={`topic-${topic.key}`}
-    >
-      <h3 class="blog-cat-title">{topic.label}</h3>
-
-      {topic.posts.length ? (
-        <ul class="blog-cat-list">
-          {topic.posts.slice(0, 4).map((p) => (
-            <li>
-              <a href={`/blog/${p.slug}`}>{p.data.title}</a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="blog-item-meta">No posts in this topic yet.</p>
-      )}
-    </section>
-  ))}
-</aside>
-
-
     </section>
   </div>
+
+  <script>
+    const topicButtons = Array.from(document.querySelectorAll('[data-topic-btn]'));
+    const topicPanels = Array.from(document.querySelectorAll('[data-topic-panel]'));
+
+    const setActiveTopic = (topicKey) => {
+      topicButtons.forEach((btn) => {
+        const active = btn.getAttribute('data-topic-btn') === topicKey;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', String(active));
+      });
+
+      topicPanels.forEach((panel) => {
+        panel.classList.toggle('active', panel.getAttribute('data-topic-panel') === topicKey);
+      });
+    };
+
+    topicButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const topicKey = btn.getAttribute('data-topic-btn');
+        if (topicKey) setActiveTopic(topicKey);
+      });
+    });
+  </script>
 </BaseLayout>
