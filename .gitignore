@@ -22,3 +22,6 @@ Thumbs.db
 .idea/
 .vscode/
 
+
+# Test build artifacts
+apps/api/.test-dist/

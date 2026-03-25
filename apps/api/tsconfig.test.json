@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": ".test-dist",
+    "noEmit": false,
+    "lib": ["ES2022"],
+    "skipLibCheck": true
+  },
+  "include": ["src/index.ts"]
+}

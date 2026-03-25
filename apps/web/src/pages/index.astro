@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SaturnLink from '../components/SaturnLink.astro';
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('blog');
-const orbitRings = Array.from({ length: 24 });
 const apiBase =
   import.meta.env.PUBLIC_API_BASE || 'https://api.patrykopilka.me';
 
@@ -26,17 +26,11 @@ const latestPosts = posts
 
   <!-- Foreground content -->
   <div class="hero-inner">
-    <div class="hero-orbit">
-      <ball aria-hidden="true">
-        {orbitRings.map((_, i) => <u></u>)}
-      </ball>
-
-      <nav class="bubble-nav" aria-label="Main sections">
-        <a href="/blog" class="bubble bubble--blog"><span>Blog</span></a>
-        <a href="/resume" class="bubble bubble--resume"><span>Resume</span></a>
-        <a href="/about" class="bubble bubble--about"><span>About</span></a>
-      </nav>
-    </div>
+    <nav class="planet-nav" aria-label="Main sections">
+      <SaturnLink href="/blog" label="Blog" className="planet-link--blog" />
+      <SaturnLink href="/resume" label="Resume" className="planet-link--resume" />
+      <SaturnLink href="/about" label="About" className="planet-link--about" />
+    </nav>
 
     <p class="hero-tagline">
       Computer Engineering student building from the metal up: RISC-V, GNSS,
@@ -172,4 +166,3 @@ const latestPosts = posts
 </script>
 
 </BaseLayout>
-
