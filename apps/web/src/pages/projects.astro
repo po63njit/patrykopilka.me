@@ -1,10 +1,188 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const projects = [
+  {
+    name: 'JamGuard',
+    href: 'https://github.com/kyrtapaklipo/JamGuard',
+    image: 'https://opengraph.githubassets.com/1/kyrtapaklipo/JamGuard',
+    imageAlt: 'JamGuard repository preview image',
+    description:
+      'JamGuard is an FPS anti-cheat project focused on reducing unfair play and protecting online matches.',
+  },
+];
 ---
 
 <BaseLayout title="Projects — patrykopilka.me">
-  <section class="card">
+  <section class="card projects-shell">
     <h1>Projects</h1>
-    <p>Selected builds and experiments are coming soon.</p>
+    <p>Each card has a front (image + link) and a back (description + link).</p>
+
+    <div class="project-deck" role="list" aria-label="Project cards">
+      {projects.map((project, index) => {
+        const flipId = `project-flip-${index}`;
+
+        return (
+          <article class="project-card" role="listitem">
+            <input class="project-card__toggle" type="checkbox" id={flipId} />
+
+            <div class="project-card__inner">
+              <div class="project-face project-face--front">
+                <img src={project.image} alt={project.imageAlt} loading="lazy" />
+                <div class="project-face__meta">
+                  <h2>{project.name}</h2>
+                  <div class="project-face__actions">
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Open ${project.name} on GitHub`}
+                    >
+                      View on GitHub ↗
+                    </a>
+                    <label for={flipId} class="project-face__flip-btn" aria-label={`Show ${project.name} details`}>
+                      Show details
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="project-face project-face--back" aria-label={`${project.name} description`}>
+                <h2>{project.name}</h2>
+                <p>{project.description}</p>
+                <div class="project-face__actions">
+                  <a
+                    href={project.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Open ${project.name} on GitHub`}
+                  >
+                    View on GitHub ↗
+                  </a>
+                  <label for={flipId} class="project-face__flip-btn" aria-label={`Hide ${project.name} details`}>
+                    Back to front
+                  </label>
+                </div>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
   </section>
 </BaseLayout>
+
+<style>
+  .projects-shell > p {
+    margin-top: -0.2rem;
+    margin-bottom: 1.2rem;
+    color: var(--muted);
+  }
+
+  .project-deck {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+  }
+
+  .project-card {
+    perspective: 1100px;
+    min-height: 340px;
+    position: relative;
+  }
+
+  .project-card__toggle {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .project-card__inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 340px;
+    transform-style: preserve-3d;
+    transition: transform 500ms ease;
+  }
+
+  .project-card__toggle:checked + .project-card__inner {
+    transform: rotateY(180deg);
+  }
+
+  .project-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    border: 1px solid #21324f;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0a1222 0%, #0f1624 100%);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project-face--front img {
+    width: 100%;
+    height: 72%;
+    display: block;
+    object-fit: cover;
+    border-bottom: 1px solid #21324f;
+    background: #020912;
+  }
+
+  .project-face__meta {
+    padding: 0.85rem 1rem;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .project-face h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #b8ecff;
+  }
+
+  .project-face__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  .project-face a,
+  .project-face__flip-btn {
+    width: fit-content;
+    text-decoration: none;
+    color: #8fdaff;
+    border: 1px solid rgba(143, 218, 255, 0.35);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .project-face a:hover,
+  .project-face a:focus-visible,
+  .project-face__flip-btn:hover,
+  .project-face__flip-btn:focus-visible {
+    border-color: #49c5ff;
+    color: #c9eeff;
+    outline: none;
+  }
+
+  .project-face--back {
+    transform: rotateY(180deg);
+    padding: 1rem;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .project-face--back p {
+    margin: 0;
+    color: #d3e6f5;
+    line-height: 1.45;
+  }
+</style>
