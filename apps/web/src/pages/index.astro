@@ -561,10 +561,10 @@ const latestPosts = posts
     if (THREE && EffectComposer && RenderPass && UnrealBloomPass) return true;
 
     try {
-      const threeModule = await import("https://unpkg.com/three@0.162.0/build/three.module.js");
-      const composerModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/EffectComposer.js");
-      const renderPassModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/RenderPass.js");
-      const bloomModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/UnrealBloomPass.js");
+      const threeModule = await import("https://unpkg.com/three@0.162.0/build/three.module.js?module");
+      const composerModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/EffectComposer.js?module");
+      const renderPassModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/RenderPass.js?module");
+      const bloomModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/UnrealBloomPass.js?module");
       THREE = threeModule;
       EffectComposer = composerModule.EffectComposer;
       RenderPass = renderPassModule.RenderPass;
@@ -585,8 +585,17 @@ const latestPosts = posts
     if (!(ferroCanvas instanceof HTMLCanvasElement) || !(hero instanceof HTMLElement)) return;
 
     const ready = await loadThreeDeps();
-    if (ready) new FerroFluid(ferroCanvas, hero);
-    else new FerroFluidFallback(ferroCanvas, hero);
+    if (!ready) {
+      new FerroFluidFallback(ferroCanvas, hero);
+      return;
+    }
+
+    try {
+      new FerroFluid(ferroCanvas, hero);
+    } catch (error) {
+      console.error("Ferrofluid WebGL init failed, switching to fallback:", error);
+      new FerroFluidFallback(ferroCanvas, hero);
+    }
   });
 </script>
 
