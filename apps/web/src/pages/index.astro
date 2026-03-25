@@ -86,11 +86,18 @@ const latestPosts = posts
       </>
     )}
   </section>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+      "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js"
+    }
+  }
+  </script>
+
   <script type="module">
-  let THREE;
-  let EffectComposer;
-  let RenderPass;
-  let UnrealBloomPass;
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
   class Rays {
     constructor(container) {
@@ -98,28 +105,23 @@ const latestPosts = posts
       this.width = this.container.clientWidth;
       this.height = this.container.clientHeight;
       this.rays = [];
+      this.resizeHandler = this.resizeHandler.bind(this);
+      this.tick = this.tick.bind(this);
       this.init();
     }
 
     init() {
       this.resizeHandler();
-      window.addEventListener("resize", this.resizeHandler.bind(this));
-      requestAnimationFrame(this.tick.bind(this));
+      window.addEventListener("resize", this.resizeHandler);
+      requestAnimationFrame(this.tick);
     }
 
     resizeHandler() {
       this.width = this.container.clientWidth;
       this.height = this.container.clientHeight;
-      this.emit();
-    }
-
-    emit() {
       this.rays = [];
-      this.totalRays = this.height * 0.75;
-
-      for (let i = 0; i < this.totalRays; i++) {
-        this.rays.push(new Ray(this));
-      }
+      const totalRays = this.height * 0.75;
+      for (let i = 0; i < totalRays; i++) this.rays.push(new Ray(this));
     }
 
     tick() {
@@ -128,9 +130,8 @@ const latestPosts = posts
         ray.tick();
         path += ray.d;
       });
-
       this.container.style.clipPath = `path("${path}")`;
-      requestAnimationFrame(this.tick.bind(this));
+      requestAnimationFrame(this.tick);
     }
   }
 
@@ -138,455 +139,275 @@ const latestPosts = posts
     constructor(emitter) {
       this.emitter = emitter;
       const gap = 12;
-
       this.x = Math.random() * this.emitter.width;
-      this.y =
-        Math.floor(Math.random() * (this.emitter.height / gap + 1)) * gap;
-
+      this.y = Math.floor(Math.random() * (this.emitter.height / gap + 1)) * gap;
       this.width = 50 * Math.random();
       this.velocity = 0.25 + this.width / 50;
       this.d = "";
     }
 
-    update() {
+    tick() {
       this.x += this.velocity;
-      if (this.x > this.emitter.width) {
-        this.x = -this.width;
-      }
-    }
-
-    draw() {
+      if (this.x > this.emitter.width) this.x = -this.width;
       this.d = `M ${this.x},${this.y} h ${this.width} v 1 h -${this.width} z `;
     }
-
-    tick() {
-      this.update();
-      this.draw();
-    }
   }
-
-  class FerroFluid {
-    constructor(canvas, hero) {
-      this.canvas = canvas;
-      this.hero = hero;
-      this.clock = new THREE.Clock();
-      this.pointer = new THREE.Vector2(0, 0);
-      this.magnet = new THREE.Vector2(0, 0);
-      this.magnetStrength = 0;
-      this.targetStrength = 0;
-
-      this.params = {
-        radius: 1.45,
-        displacementStrength: 0.24,
-        noiseScale: 2.4,
-        bloomIntensity: 0.85,
-        colorA: "#010708",
-        colorB: "#0a2628",
-        highlight: "#53f2ce",
-      };
-
-      this.resize = this.resize.bind(this);
-      this.tick = this.tick.bind(this);
-      this.handlePointerMove = this.handlePointerMove.bind(this);
-      this.handlePlanetActivate = this.handlePlanetActivate.bind(this);
-      this.handlePlanetLeave = this.handlePlanetLeave.bind(this);
-
-      this.init();
-      this.bindEvents();
-      this.resize();
-      requestAnimationFrame(this.tick);
-    }
-
-    init() {
-      this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-      this.camera.position.set(0, 0, 5.4);
-
-      this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-      this.composer = new EffectComposer(this.renderer);
-      this.composer.addPass(new RenderPass(this.scene, this.camera));
-      this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), this.params.bloomIntensity, 0.5, 0.2);
-      this.composer.addPass(this.bloomPass);
-
-      const geometry = new THREE.SphereGeometry(this.params.radius, 96, 96);
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          time: { value: 0 },
-          noiseScale: { value: this.params.noiseScale },
-          displacementStrength: { value: this.params.displacementStrength },
-          magnetDir: { value: new THREE.Vector3(0, 0, 1) },
-          magnetStrength: { value: 0 },
-          colorA: { value: new THREE.Color(this.params.colorA) },
-          colorB: { value: new THREE.Color(this.params.colorB) },
-          highlight: { value: new THREE.Color(this.params.highlight) },
-        },
-        vertexShader: `
-          uniform float time;
-          uniform float noiseScale;
-          uniform float displacementStrength;
-          uniform vec3 magnetDir;
-          uniform float magnetStrength;
-          varying vec3 vNormal;
-          varying vec3 vWorld;
-          varying float vMagnet;
-
-          vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-          vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-          vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
-          vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-          float snoise(vec3 v) {
-            const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
-            const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i = floor(v + dot(v, C.yyy));
-            vec3 x0 = v - i + dot(i, C.xxx);
-            vec3 g = step(x0.yzx, x0.xyz);
-            vec3 l = 1.0 - g;
-            vec3 i1 = min(g.xyz, l.zxy);
-            vec3 i2 = max(g.xyz, l.zxy);
-            vec3 x1 = x0 - i1 + C.xxx;
-            vec3 x2 = x0 - i2 + C.yyy;
-            vec3 x3 = x0 - D.yyy;
-            i = mod289(i);
-            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-            float n_ = 0.142857142857;
-            vec3 ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-            vec4 x_ = floor(j * ns.z);
-            vec4 y_ = floor(j - 7.0 * x_);
-            vec4 x = x_ * ns.x + ns.yyyy;
-            vec4 y = y_ * ns.x + ns.yyyy;
-            vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4(x.xy, y.xy);
-            vec4 b1 = vec4(x.zw, y.zw);
-            vec4 s0 = floor(b0) * 2.0 + 1.0;
-            vec4 s1 = floor(b1) * 2.0 + 1.0;
-            vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-            vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-            vec3 p0 = vec3(a0.xy, h.x);
-            vec3 p1 = vec3(a0.zw, h.y);
-            vec3 p2 = vec3(a1.xy, h.z);
-            vec3 p3 = vec3(a1.zw, h.w);
-            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-            p0 *= norm.x;
-            p1 *= norm.y;
-            p2 *= norm.z;
-            p3 *= norm.w;
-            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-            m = m * m;
-            return 42.0 * dot(m * m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-          }
-
-          void main() {
-            vec3 n = normalize(normal);
-            float n1 = snoise(n * noiseScale + vec3(time * 0.9));
-            float n2 = snoise(n * (noiseScale * 2.0) - vec3(time * 1.3));
-            float fluid = (n1 * 0.65 + n2 * 0.35) * displacementStrength;
-            float attract = max(dot(n, normalize(magnetDir)), 0.0);
-            float pull = pow(attract, 4.0) * magnetStrength;
-
-            vec3 displaced = position + n * (fluid + pull * 0.72);
-            vMagnet = pull;
-
-            vec4 world = modelMatrix * vec4(displaced, 1.0);
-            vWorld = world.xyz;
-            vNormal = normalize(normalMatrix * n);
-            gl_Position = projectionMatrix * viewMatrix * world;
-          }
-        `,
-        fragmentShader: `
-          uniform vec3 colorA;
-          uniform vec3 colorB;
-          uniform vec3 highlight;
-          varying vec3 vNormal;
-          varying vec3 vWorld;
-          varying float vMagnet;
-
-          void main() {
-            vec3 lightDir = normalize(vec3(-0.45, 0.8, 0.55));
-            float diff = max(dot(normalize(vNormal), lightDir), 0.0);
-            float fresnel = pow(1.0 - max(dot(normalize(vNormal), normalize(-vWorld)), 0.0), 2.8);
-
-            vec3 fluidTint = mix(colorA, colorB, clamp(diff * 0.7 + 0.22, 0.0, 1.0));
-            fluidTint += highlight * (vMagnet * 0.9 + fresnel * 0.35);
-            fluidTint = mix(fluidTint, vec3(0.0), 0.12);
-            gl_FragColor = vec4(fluidTint, 1.0);
-          }
-        `,
-      });
-
-      this.sphere = new THREE.Mesh(geometry, material);
-      this.scene.add(this.sphere);
-
-      const rim = new THREE.PointLight(0x61ffd6, 0.7, 15, 2);
-      rim.position.set(-3, 3.5, 4.2);
-      this.scene.add(rim);
-      this.scene.add(new THREE.AmbientLight(0x0a1115, 0.85));
-    }
-
-    bindEvents() {
-      window.addEventListener("resize", this.resize);
-      this.hero.addEventListener("pointermove", this.handlePointerMove);
-      this.hero.addEventListener("pointerleave", this.handlePlanetLeave);
-      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
-        planet.addEventListener("pointerenter", this.handlePlanetActivate);
-        planet.addEventListener("pointerdown", this.handlePlanetActivate);
-        planet.addEventListener("focus", this.handlePlanetActivate);
-        planet.addEventListener("pointerleave", this.handlePlanetLeave);
-        planet.addEventListener("blur", this.handlePlanetLeave);
-      });
-    }
-
-    resize() {
-      const size = Math.min(window.innerWidth * 0.39, 430);
-      this.canvas.style.width = `${size}px`;
-      this.canvas.style.height = `${size}px`;
-      this.renderer.setSize(size, size, false);
-      this.composer.setSize(size, size);
-      this.camera.aspect = 1;
-      this.camera.updateProjectionMatrix();
-    }
-
-    handlePointerMove(event) {
-      const planet = event.target instanceof Element ? event.target.closest(".planet-link") : null;
-      if (!planet) return;
-      this.activateMagnet(planet, 1.1);
-    }
-
-    handlePlanetActivate(event) {
-      const planet = event.currentTarget instanceof Element
-        ? event.currentTarget
-        : event.target instanceof Element
-          ? event.target.closest(".planet-link")
-          : null;
-      if (!planet) return;
-
-      const boost = event.type === "pointerdown" ? 1.45 : 1.25;
-      this.activateMagnet(planet, boost);
-    }
-
-    activateMagnet(planet, strength) {
-      const heroRect = this.hero.getBoundingClientRect();
-      const rect = planet.getBoundingClientRect();
-      const x = (rect.left + rect.width / 2 - heroRect.left) / heroRect.width;
-      const y = (rect.top + rect.height / 2 - heroRect.top) / heroRect.height;
-      this.pointer.set(x * 2 - 1, -(y * 2 - 1));
-      this.targetStrength = strength;
-    }
-
-    handlePlanetLeave() {
-      this.targetStrength = 0;
-    }
-
-    tick() {
-      const t = this.clock.getElapsedTime();
-      this.magnetStrength += (this.targetStrength - this.magnetStrength) * 0.08;
-      this.targetStrength *= 0.985;
-
-      this.magnet.lerp(this.pointer, 0.16);
-      const magnetDir = new THREE.Vector3(this.magnet.x, this.magnet.y, 0.85).normalize();
-
-      this.sphere.material.uniforms.time.value = t;
-      this.sphere.material.uniforms.magnetDir.value.copy(magnetDir);
-      this.sphere.material.uniforms.magnetStrength.value = this.magnetStrength;
-      this.sphere.rotation.y += 0.0035;
-      this.sphere.rotation.x = Math.sin(t * 0.28) * 0.11;
-
-      this.composer.render();
-      requestAnimationFrame(this.tick);
-    }
-  }
-
 
   class FerroFluidFallback {
-    constructor(canvas, hero) {
+    constructor(canvas) {
       this.canvas = canvas;
-      this.hero = hero;
-      this.ctx = this.canvas.getContext("2d");
+      this.ctx = canvas.getContext("2d");
       this.dpr = window.devicePixelRatio || 1;
-      this.center = { x: 0, y: 0 };
-      this.baseRadius = 80;
       this.time = 0;
-      this.targetStrength = 0;
-      this.strength = 0;
-      this.targetPoint = { x: 0, y: 0 };
-      this.magnet = null;
-
+      this.center = { x: 0, y: 0 };
+      this.radius = 0;
       this.resize = this.resize.bind(this);
       this.tick = this.tick.bind(this);
-      this.handlePlanetActivate = this.handlePlanetActivate.bind(this);
-      this.handlePlanetLeave = this.handlePlanetLeave.bind(this);
-
       this.resize();
       window.addEventListener("resize", this.resize);
-      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
-        planet.addEventListener("pointerenter", this.handlePlanetActivate);
-        planet.addEventListener("pointerdown", this.handlePlanetActivate);
-        planet.addEventListener("focus", this.handlePlanetActivate);
-        planet.addEventListener("pointerleave", this.handlePlanetLeave);
-        planet.addEventListener("blur", this.handlePlanetLeave);
-      });
       requestAnimationFrame(this.tick);
     }
 
     resize() {
       const size = Math.min(window.innerWidth * 0.39, 430);
-      this.baseRadius = size * 0.27;
       this.canvas.width = size * this.dpr;
       this.canvas.height = size * this.dpr;
       this.canvas.style.width = `${size}px`;
       this.canvas.style.height = `${size}px`;
       this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-      this.center.x = size / 2;
-      this.center.y = size / 2;
-    }
-
-    handlePlanetActivate(event) {
-      const planet = event.currentTarget instanceof Element
-        ? event.currentTarget
-        : event.target instanceof Element
-          ? event.target.closest(".planet-link")
-          : null;
-      if (!planet) return;
-      const heroRect = this.hero.getBoundingClientRect();
-      const rect = planet.getBoundingClientRect();
-      this.magnet = {
-        x: rect.left + rect.width / 2 - heroRect.left,
-        y: rect.top + rect.height / 2 - heroRect.top,
-      };
-      this.targetStrength = event.type === "pointerdown" ? 1.4 : 1.15;
-    }
-
-    handlePlanetLeave() {
-      this.targetStrength = 0;
+      this.center = { x: size / 2, y: size / 2 };
+      this.radius = size * 0.26;
     }
 
     tick() {
-      this.time += 0.015;
-      this.strength += (this.targetStrength - this.strength) * 0.08;
-      this.targetStrength *= 0.985;
-
-      const rect = this.canvas.getBoundingClientRect();
-      const heroRect = this.hero.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2 - heroRect.left;
-      const cy = rect.top + rect.height / 2 - heroRect.top;
-      if (this.magnet) {
-        this.targetPoint.x = this.magnet.x - cx;
-        this.targetPoint.y = this.magnet.y - cy;
-      } else {
-        this.targetPoint.x *= 0.92;
-        this.targetPoint.y *= 0.92;
-      }
-
-      this.draw();
-      requestAnimationFrame(this.tick);
-    }
-
-    draw() {
+      this.time += 0.02;
       const ctx = this.ctx;
       const w = this.canvas.width / this.dpr;
       const h = this.canvas.height / this.dpr;
       ctx.clearRect(0, 0, w, h);
-
-      const angleToMagnet = Math.atan2(this.targetPoint.y, this.targetPoint.x);
-      const dist = Math.hypot(this.targetPoint.x, this.targetPoint.y);
-      const pullInfluence = Math.min(1, dist / (w * 0.45)) * this.strength;
-      const points = 180;
-
       ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        const t = (i / points) * Math.PI * 2;
-        const wobble = Math.sin(t * 12 + this.time * 3.0) * 6 + Math.sin(t * 18 - this.time * 4.0) * 4;
-        const delta = Math.abs(Math.atan2(Math.sin(t - angleToMagnet), Math.cos(t - angleToMagnet)));
-        const directionPull = Math.max(0, 1 - delta / 1.0);
-        const spike = Math.pow(directionPull, 2.15) * this.baseRadius * 0.95 * pullInfluence;
-        const radius = this.baseRadius + wobble + spike;
-        const x = this.center.x + Math.cos(t) * radius;
-        const y = this.center.y + Math.sin(t) * radius;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      for (let i = 0; i <= 150; i++) {
+        const t = (i / 150) * Math.PI * 2;
+        const wobble = Math.sin(t * 11 + this.time * 2.4) * 4 + Math.cos(t * 17 - this.time * 3.1) * 3;
+        const r = this.radius + wobble;
+        const x = this.center.x + Math.cos(t) * r;
+        const y = this.center.y + Math.sin(t) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.closePath();
-
-      const bodyGrad = ctx.createRadialGradient(
-        this.center.x - this.baseRadius * 0.44,
-        this.center.y - this.baseRadius * 0.5,
-        this.baseRadius * 0.15,
-        this.center.x,
-        this.center.y + this.baseRadius * 0.18,
-        this.baseRadius * 1.35,
-      );
-      bodyGrad.addColorStop(0, "#0c1e20");
-      bodyGrad.addColorStop(0.28, "#041113");
-      bodyGrad.addColorStop(0.7, "#010808");
-      bodyGrad.addColorStop(1, "#000203");
-      ctx.fillStyle = bodyGrad;
+      const g = ctx.createRadialGradient(this.center.x - this.radius * 0.35, this.center.y - this.radius * 0.35, this.radius * 0.1, this.center.x, this.center.y, this.radius * 1.3);
+      g.addColorStop(0, "#15383a");
+      g.addColorStop(0.35, "#07181a");
+      g.addColorStop(1, "#010506");
+      ctx.fillStyle = g;
       ctx.fill();
-
-      const edge = ctx.createLinearGradient(
-        this.center.x - this.baseRadius,
-        this.center.y - this.baseRadius,
-        this.center.x + this.baseRadius,
-        this.center.y + this.baseRadius,
-      );
-      edge.addColorStop(0, "rgba(117, 246, 218, 0.22)");
-      edge.addColorStop(0.4, "rgba(117, 246, 218, 0.06)");
-      edge.addColorStop(1, "rgba(0, 0, 0, 0.45)");
-      ctx.strokeStyle = edge;
-      ctx.lineWidth = 1.3;
-      ctx.stroke();
-
-      const highlight = ctx.createRadialGradient(
-        this.center.x - this.baseRadius * 0.34,
-        this.center.y - this.baseRadius * 0.38,
-        this.baseRadius * 0.07,
-        this.center.x - this.baseRadius * 0.28,
-        this.center.y - this.baseRadius * 0.34,
-        this.baseRadius * 0.55,
-      );
-      highlight.addColorStop(0, "rgba(161, 255, 235, 0.28)");
-      highlight.addColorStop(0.45, "rgba(109, 248, 222, 0.11)");
-      highlight.addColorStop(1, "rgba(109, 248, 222, 0)");
-      ctx.globalCompositeOperation = "screen";
-      ctx.fillStyle = highlight;
-      ctx.fill();
-      ctx.globalCompositeOperation = "source-over";
+      requestAnimationFrame(this.tick);
     }
   }
 
-  async function loadThreeDeps() {
-    if (THREE && EffectComposer && RenderPass && UnrealBloomPass) return true;
+  class FerroParticleSphere {
+    constructor(canvas, hero) {
+      this.canvas = canvas;
+      this.hero = hero;
+      this.pointer = new THREE.Vector2(0, 0);
+      this.offset = new THREE.Vector3(0, 0, 0);
+      this.targetOffset = new THREE.Vector3(0, 0, 0);
+      this.strength = 0;
+      this.targetStrength = 0;
+      this.time = 0;
 
-    try {
-      const threeModule = await import("https://unpkg.com/three@0.162.0/build/three.module.js?module");
-      const composerModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/EffectComposer.js?module");
-      const renderPassModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/RenderPass.js?module");
-      const bloomModule = await import("https://unpkg.com/three@0.162.0/examples/jsm/postprocessing/UnrealBloomPass.js?module");
-      THREE = threeModule;
-      EffectComposer = composerModule.EffectComposer;
-      RenderPass = renderPassModule.RenderPass;
-      UnrealBloomPass = bloomModule.UnrealBloomPass;
-      return true;
-    } catch (error) {
-      console.error("Ferrofluid dependencies failed to load:", error);
-      return false;
+      this.initThree();
+      this.bindEvents();
+      this.resize();
+      this.animate = this.animate.bind(this);
+      requestAnimationFrame(this.animate);
+    }
+
+    initThree() {
+      this.scene = new THREE.Scene();
+      this.scene.fog = new THREE.FogExp2(0x000000, 0.025);
+
+      this.camera = new THREE.PerspectiveCamera(56, 1, 0.1, 1000);
+      this.camera.position.set(0, 1.7, 13.5);
+
+      this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      this.renderer.setClearColor(0x000000, 0);
+
+      this.controls = new OrbitControls(this.camera, this.canvas);
+      this.controls.enablePan = false;
+      this.controls.enableZoom = false;
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.autoRotate = true;
+      this.controls.autoRotateSpeed = 0.18;
+
+      this.pointMaterialShader = {
+        vertexShader: `
+          attribute float size;
+          varying vec3 vColor;
+          uniform float time;
+          void main() {
+            vColor = color;
+            vec3 pos = position;
+            pos.x += sin(time + position.z * 0.55) * 0.06;
+            pos.y += cos(time + position.x * 0.5) * 0.06;
+            pos.z += sin(time + position.y * 0.45) * 0.06;
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            float pulse = sin(time * 2.4 + length(position)) * 0.15 + 1.0;
+            gl_PointSize = size * (280.0 / -mvPosition.z) * pulse;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vColor;
+          uniform float time;
+          void main() {
+            vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+            float r = dot(cxy, cxy);
+            if (r > 1.0) discard;
+            float glow = exp(-r * 2.8);
+            float aura = exp(-r * 1.2) * 0.38;
+            vec3 theme = vec3(0.15, 0.95, 0.72);
+            vec3 finalColor = vColor * (1.05 + sin(time * 0.6) * 0.08) + theme * aura * 0.35;
+            gl_FragColor = vec4(finalColor, glow + aura * 0.55);
+          }
+        `,
+      };
+
+      const sphereColors = [
+        new THREE.Color(0x56ffd8).multiplyScalar(0.75),
+        new THREE.Color(0x38d9ff).multiplyScalar(0.7),
+        new THREE.Color(0x2bcf9d).multiplyScalar(0.78),
+        new THREE.Color(0x57ffea).multiplyScalar(0.68),
+      ];
+
+      this.coreSphere = this.createSpiralSphere(3.7, 18000, sphereColors);
+      this.orbitRings = this.createOrbitRings(5.3, 5, 0.34);
+      this.mainGroup = new THREE.Group();
+      this.mainGroup.add(this.coreSphere);
+      this.mainGroup.add(this.orbitRings);
+      this.scene.add(this.mainGroup);
+    }
+
+    createSpiralSphere(radius, particleCount, colors) {
+      const geometry = new THREE.BufferGeometry();
+      const positions = [];
+      const particleColors = [];
+      const sizes = [];
+      for (let i = 0; i < particleCount; i++) {
+        const phi = Math.acos(-1 + (2 * i) / particleCount);
+        const theta = Math.sqrt(particleCount * Math.PI) * phi;
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        positions.push(x, y, z);
+        const colorPos = i / particleCount;
+        const color1 = colors[Math.floor(colorPos * (colors.length - 1))];
+        const color2 = colors[Math.ceil(colorPos * (colors.length - 1))];
+        const mixRatio = (colorPos * (colors.length - 1)) % 1;
+        const finalColor = new THREE.Color().lerpColors(color1, color2, mixRatio);
+        particleColors.push(finalColor.r, finalColor.g, finalColor.b);
+        sizes.push(Math.random() * 0.12 + 0.06);
+      }
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.Float32BufferAttribute(particleColors, 3));
+      geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+      const material = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 } }, vertexShader: this.pointMaterialShader.vertexShader, fragmentShader: this.pointMaterialShader.fragmentShader, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+      return new THREE.Points(geometry, material);
+    }
+
+    createOrbitRings(radius, count, thickness) {
+      const group = new THREE.Group();
+      for (let i = 0; i < count; i++) {
+        const ringGeometry = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+        const sizes = [];
+        const particleCount = 1800;
+        for (let j = 0; j < particleCount; j++) {
+          const angle = (j / particleCount) * Math.PI * 2;
+          const rv = radius + (Math.random() - 0.5) * thickness;
+          positions.push(Math.cos(angle) * rv, (Math.random() - 0.5) * thickness, Math.sin(angle) * rv);
+          const c = new THREE.Color(0x54ffd8).offsetHSL((j / particleCount) * 0.08, 0, (Math.random() - 0.5) * 0.08);
+          colors.push(c.r, c.g, c.b);
+          sizes.push(Math.random() * 0.11 + 0.05);
+        }
+        ringGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+        ringGeometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+        ringGeometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+        const material = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 } }, vertexShader: this.pointMaterialShader.vertexShader, fragmentShader: this.pointMaterialShader.fragmentShader, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+        const ring = new THREE.Points(ringGeometry, material);
+        ring.rotation.x = Math.random() * Math.PI;
+        ring.rotation.y = Math.random() * Math.PI;
+        group.add(ring);
+      }
+      return group;
+    }
+
+    bindEvents() {
+      this.resize = this.resize.bind(this);
+      window.addEventListener("resize", this.resize);
+      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
+        planet.addEventListener("pointerenter", (e) => this.handleMagnet(e, 1.0));
+        planet.addEventListener("pointerdown", (e) => this.handleMagnet(e, 1.45));
+        planet.addEventListener("focus", (e) => this.handleMagnet(e, 1.2));
+        planet.addEventListener("pointerleave", () => { this.targetStrength = 0; });
+        planet.addEventListener("blur", () => { this.targetStrength = 0; });
+      });
+    }
+
+    handleMagnet(event, strength) {
+      const planet = event.currentTarget instanceof Element ? event.currentTarget : null;
+      if (!planet) return;
+      const heroRect = this.hero.getBoundingClientRect();
+      const rect = planet.getBoundingClientRect();
+      const nx = ((rect.left + rect.width / 2 - heroRect.left) / heroRect.width) * 2 - 1;
+      const ny = -((((rect.top + rect.height / 2 - heroRect.top) / heroRect.height) * 2) - 1);
+      this.pointer.set(nx, ny);
+      this.targetStrength = strength;
+    }
+
+    resize() {
+      const size = Math.min(window.innerWidth * 0.4, 440);
+      this.canvas.style.width = `${size}px`;
+      this.canvas.style.height = `${size}px`;
+      this.renderer.setSize(size, size, false);
+      this.camera.aspect = 1;
+      this.camera.updateProjectionMatrix();
+    }
+
+    animate() {
+      requestAnimationFrame(this.animate);
+      this.time += 0.0022;
+      this.strength += (this.targetStrength - this.strength) * 0.085;
+      this.targetStrength *= 0.985;
+
+      this.targetOffset.set(this.pointer.x * this.strength * 1.9, this.pointer.y * this.strength * 1.5, 0);
+      this.offset.lerp(this.targetOffset, 0.12);
+      this.mainGroup.position.copy(this.offset);
+
+      this.coreSphere.material.uniforms.time.value = this.time;
+      this.orbitRings.children.forEach((ring) => {
+        ring.material.uniforms.time.value = this.time;
+      });
+      this.coreSphere.rotation.y += 0.0012;
+      this.coreSphere.rotation.x = Math.sin(this.time * 0.5) * 0.14;
+      this.orbitRings.children.forEach((ring, index) => {
+        const speed = 0.001 * (Math.sin(this.time * 0.2) + 2.0) * (index + 1);
+        ring.rotation.z += speed;
+        ring.rotation.x += speed * 0.6;
+        ring.rotation.y += speed * 0.4;
+      });
+
+      const breathe = 1 + Math.sin(this.time * 1.5) * 0.08 + this.strength * 0.06;
+      this.coreSphere.scale.set(breathe, breathe, breathe);
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
     }
   }
 
-
-  function createFallbackCanvas(sourceCanvas) {
-    const fallbackCanvas = document.createElement("canvas");
-    fallbackCanvas.className = sourceCanvas.className;
-    fallbackCanvas.setAttribute("aria-hidden", sourceCanvas.getAttribute("aria-hidden") || "true");
-    fallbackCanvas.style.cssText = sourceCanvas.style.cssText;
-    sourceCanvas.replaceWith(fallbackCanvas);
-    return fallbackCanvas;
-  }
-
-  window.addEventListener("DOMContentLoaded", async () => {
+  window.addEventListener("DOMContentLoaded", () => {
     const container = document.querySelector(".a-rays");
     if (container) new Rays(container);
 
@@ -594,20 +415,13 @@ const latestPosts = posts
     const hero = document.querySelector(".hero");
     if (!(ferroCanvas instanceof HTMLCanvasElement) || !(hero instanceof HTMLElement)) return;
 
-    const ready = await loadThreeDeps();
-    if (!ready) {
-      new FerroFluidFallback(ferroCanvas, hero);
-      return;
-    }
-
     try {
-      new FerroFluid(ferroCanvas, hero);
+      new FerroParticleSphere(ferroCanvas, hero);
     } catch (error) {
-      console.error("Ferrofluid WebGL init failed, switching to fallback:", error);
-      const fallbackCanvas = createFallbackCanvas(ferroCanvas);
-      new FerroFluidFallback(fallbackCanvas, hero);
+      console.error("WebGL ferrofluid failed, using fallback:", error);
+      new FerroFluidFallback(ferroCanvas);
     }
   });
-</script>
+  </script>
 
 </BaseLayout>
