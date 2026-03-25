@@ -187,12 +187,20 @@ const latestPosts = posts
       this.resize = this.resize.bind(this);
       this.handlePointer = this.handlePointer.bind(this);
       this.handleClick = this.handleClick.bind(this);
+      this.handleTouch = this.handleTouch.bind(this);
+      this.handlePlanetActivate = this.handlePlanetActivate.bind(this);
       this.tick = this.tick.bind(this);
 
       this.resize();
       window.addEventListener("resize", this.resize);
       this.hero.addEventListener("pointermove", this.handlePointer);
       this.hero.addEventListener("pointerdown", this.handleClick);
+      this.hero.addEventListener("touchstart", this.handleTouch, { passive: true });
+      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
+        planet.addEventListener("pointerdown", this.handlePlanetActivate);
+        planet.addEventListener("touchstart", this.handlePlanetActivate, { passive: true });
+        planet.addEventListener("focus", this.handlePlanetActivate);
+      });
       requestAnimationFrame(this.tick);
     }
 
@@ -233,6 +241,33 @@ const latestPosts = posts
         y: event.clientY - heroRect.top,
       };
       this.targetStrength = 1.4;
+    }
+
+    handleTouch(event) {
+      const touch = event.touches && event.touches[0];
+      if (!touch) return;
+
+      const heroRect = this.hero.getBoundingClientRect();
+      this.magnet = {
+        x: touch.clientX - heroRect.left,
+        y: touch.clientY - heroRect.top,
+      };
+      this.targetStrength = 1.45;
+    }
+
+    handlePlanetActivate(event) {
+      const target = event.currentTarget instanceof Element
+        ? event.currentTarget
+        : null;
+      if (!target) return;
+
+      const heroRect = this.hero.getBoundingClientRect();
+      const rect = target.getBoundingClientRect();
+      this.magnet = {
+        x: rect.left + rect.width / 2 - heroRect.left,
+        y: rect.top + rect.height / 2 - heroRect.top,
+      };
+      this.targetStrength = 1.35;
     }
 
     tick() {

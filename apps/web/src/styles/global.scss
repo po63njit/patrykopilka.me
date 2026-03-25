@@ -164,7 +164,7 @@ h3 {
 .planet-nav {
   position: relative;
   width: min(800px, 100%);
-  min-height: 350px;
+  min-height: 460px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,7 +278,7 @@ h3 {
 
 @media (max-width: 720px) {
   .planet-nav {
-    min-height: 420px;
+    min-height: 500px;
   }
 
   .planet-link .planet-svg {
