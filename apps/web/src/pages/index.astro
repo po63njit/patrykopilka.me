@@ -576,6 +576,16 @@ const latestPosts = posts
     }
   }
 
+
+  function createFallbackCanvas(sourceCanvas) {
+    const fallbackCanvas = document.createElement("canvas");
+    fallbackCanvas.className = sourceCanvas.className;
+    fallbackCanvas.setAttribute("aria-hidden", sourceCanvas.getAttribute("aria-hidden") || "true");
+    fallbackCanvas.style.cssText = sourceCanvas.style.cssText;
+    sourceCanvas.replaceWith(fallbackCanvas);
+    return fallbackCanvas;
+  }
+
   window.addEventListener("DOMContentLoaded", async () => {
     const container = document.querySelector(".a-rays");
     if (container) new Rays(container);
@@ -594,7 +604,8 @@ const latestPosts = posts
       new FerroFluid(ferroCanvas, hero);
     } catch (error) {
       console.error("Ferrofluid WebGL init failed, switching to fallback:", error);
-      new FerroFluidFallback(ferroCanvas, hero);
+      const fallbackCanvas = createFallbackCanvas(ferroCanvas);
+      new FerroFluidFallback(fallbackCanvas, hero);
     }
   });
 </script>
