@@ -168,6 +168,17 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+}
+
+.ferro-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
 }
 
 .planet-link {
