@@ -243,26 +243,26 @@ h3 {
 }
 
 .planet-link--blog {
-  --tx: -180%;
-  --ty: -38%;
+  --tx: -190%;
+  --ty: -20%;
   animation-delay: -0.8s;
 }
 
 .planet-link--resume {
-  --tx: 180%;
-  --ty: -38%;
+  --tx: 190%;
+  --ty: -18%;
   animation-delay: -2.1s;
 }
 
 .planet-link--about {
-  --tx: -105%;
-  --ty: 112%;
+  --tx: -95%;
+  --ty: 155%;
   animation-delay: -3.8s;
 }
 
 .planet-link--projects {
-  --tx: 105%;
-  --ty: 112%;
+  --tx: 95%;
+  --ty: 155%;
   animation-delay: -1.6s;
 }
 
@@ -286,23 +286,23 @@ h3 {
   }
 
   .planet-link--blog {
-    --tx: -68%;
-    --ty: -48%;
+    --tx: -92%;
+    --ty: -44%;
   }
 
   .planet-link--resume {
-    --tx: 68%;
-    --ty: -48%;
+    --tx: 92%;
+    --ty: -34%;
   }
 
   .planet-link--about {
-    --tx: -68%;
-    --ty: 88%;
+    --tx: -56%;
+    --ty: 108%;
   }
 
   .planet-link--projects {
-    --tx: 68%;
-    --ty: 88%;
+    --tx: 56%;
+    --ty: 108%;
   }
 }
 
