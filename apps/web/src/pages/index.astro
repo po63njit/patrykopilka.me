@@ -152,11 +152,14 @@ const latestPosts = posts
     constructor(canvas, hero) {
       this.canvas = canvas;
       this.hero = hero;
+      this.nav = this.hero.querySelector(".planet-nav");
       this.duration = 16000;
-      this.pointer = new THREE.Vector3(0, 0, 0);
-      this.pull = new THREE.Vector3(0, 0, 0);
+      this.attractor = new THREE.Vector3(0, 0, 0);
+      this.attractorTarget = new THREE.Vector3(0, 0, 0);
       this.targetStrength = 0;
       this.strength = 0;
+      this.floatProgress = 0;
+      this.floatDirection = 0;
 
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 2000);
@@ -227,11 +230,15 @@ const latestPosts = posts
           uColor: { value: new THREE.Color(0x57ffd7) },
           uResolution: { value: window.innerHeight * Math.min(window.devicePixelRatio || 1, 2) },
           uStrength: { value: 0 },
+          uAttractor: { value: new THREE.Vector3(0, 0, 0) },
+          uFloatProgress: { value: 0 },
         },
         vertexShader: `
           uniform float uTime;
           uniform float uResolution;
           uniform float uStrength;
+          uniform float uFloatProgress;
+          uniform vec3 uAttractor;
           attribute vec3 targetPos;
           attribute float offset;
           float cubicBezierX(float t, float x1, float x2) { return 3.0 * (1.0 - t) * (1.0 - t) * t * x1 + 3.0 * (1.0 - t) * t * t * x2 + t * t * t; }
@@ -247,6 +254,21 @@ const latestPosts = posts
             vec3 midDir = normalize(position + targetPos);
             float bulge = sin(leg * 3.14159265) * (0.1 + uStrength * 0.06);
             vec3 currentPos = mix(position, targetPos, leg) + midDir * bulge;
+            vec3 toAttractor = uAttractor - currentPos;
+            float distanceToAttractor = length(toAttractor);
+            float attractionFalloff = exp(-distanceToAttractor * 3.2);
+            float pulse = 0.85 + 0.15 * sin(uTime * 7.0 + offset * 35.0);
+            float attractionStrength = uStrength * (0.35 + attractionFalloff * 2.1) * pulse;
+            vec3 attractionPos = currentPos + toAttractor * attractionStrength;
+            float launchDelay = fract(offset * 47.19) * 0.45;
+            float travel = smoothstep(launchDelay, 1.0, uFloatProgress);
+            vec3 drift = vec3(
+              sin(uTime * 2.3 + offset * 78.0),
+              cos(uTime * 2.1 + offset * 61.0),
+              sin(uTime * 1.8 + offset * 39.0)
+            ) * 0.08;
+            vec3 floatingPos = mix(currentPos, attractionPos, travel) + drift * travel;
+            currentPos = mix(currentPos, floatingPos, uStrength);
             vec4 mvPosition = modelViewMatrix * vec4(currentPos, 1.0);
             gl_PointSize = (uResolution / 50.0) * (1.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
@@ -272,24 +294,51 @@ const latestPosts = posts
     bindEvents() {
       this.resize = this.resize.bind(this);
       window.addEventListener("resize", this.resize);
+      if (this.nav instanceof HTMLElement) {
+        this.nav.addEventListener("pointerdown", (event) => this.handleNavPointerDown(event));
+        this.nav.addEventListener("pointerup", () => this.releaseAttractor());
+        this.nav.addEventListener("pointercancel", () => this.releaseAttractor());
+      }
       this.hero.querySelectorAll(".planet-link").forEach((planet) => {
-        planet.addEventListener("pointerenter", (e) => this.activateMagnet(e, 1.0));
-        planet.addEventListener("pointerdown", (e) => this.activateMagnet(e, 1.45));
-        planet.addEventListener("focus", (e) => this.activateMagnet(e, 1.2));
-        planet.addEventListener("pointerleave", () => { this.targetStrength = 0; });
-        planet.addEventListener("blur", () => { this.targetStrength = 0; });
+        planet.addEventListener("pointerenter", (e) => this.activateLinkAttractor(e, 0.9));
+        planet.addEventListener("pointerdown", (e) => this.activateLinkAttractor(e, 1.2));
+        planet.addEventListener("focus", (e) => this.activateLinkAttractor(e, 1.0));
+        planet.addEventListener("pointerleave", () => this.releaseAttractor());
+        planet.addEventListener("blur", () => this.releaseAttractor());
       });
     }
 
-    activateMagnet(event, strength) {
+    normalizeToHero(x, y) {
+      const heroRect = this.hero.getBoundingClientRect();
+      const nx = ((x - heroRect.left) / heroRect.width) * 2 - 1;
+      const ny = -((((y - heroRect.top) / heroRect.height) * 2) - 1);
+      return new THREE.Vector3(nx * 0.9, ny * 0.72, 0);
+    }
+
+    activateLinkAttractor(event, strength) {
       const target = event.currentTarget instanceof Element ? event.currentTarget : null;
       if (!target) return;
-      const heroRect = this.hero.getBoundingClientRect();
       const rect = target.getBoundingClientRect();
-      const nx = ((rect.left + rect.width / 2 - heroRect.left) / heroRect.width) * 2 - 1;
-      const ny = -((((rect.top + rect.height / 2 - heroRect.top) / heroRect.height) * 2) - 1);
-      this.pointer.set(nx * 0.9, ny * 0.72, 0);
+      this.attractorTarget.copy(this.normalizeToHero(rect.left + rect.width / 2, rect.top + rect.height / 2));
       this.targetStrength = strength;
+      this.floatDirection = 1;
+    }
+
+    activateFromPointer(event, strength) {
+      this.attractorTarget.copy(this.normalizeToHero(event.clientX, event.clientY));
+      this.targetStrength = strength;
+      this.floatDirection = 1;
+    }
+
+    handleNavPointerDown(event) {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest(".planet-link")) return;
+      this.activateFromPointer(event, 1.0);
+    }
+
+    releaseAttractor() {
+      this.targetStrength = 0;
+      this.floatDirection = -1;
     }
 
     resize() {
@@ -306,14 +355,17 @@ const latestPosts = posts
       requestAnimationFrame(this.animate);
       this.strength += (this.targetStrength - this.strength) * 0.08;
       this.targetStrength *= 0.985;
-      this.pull.lerp(this.pointer.clone().multiplyScalar(this.strength), 0.12);
-      this.tesseract.position.copy(this.pull);
+      this.attractor.lerp(this.attractorTarget, 0.16);
+      this.floatProgress = THREE.MathUtils.clamp(this.floatProgress + this.floatDirection * 0.03, 0, 1);
+      if (this.floatProgress === 0 && this.targetStrength < 0.02) this.floatDirection = 0;
 
       const msToSeconds = this.duration / 1e3;
       this.tesseract.rotation.y = (time / 1e3) * (Math.PI * 2 / msToSeconds);
       this.tesseract.rotation.y %= Math.PI * 2;
       this.mat.uniforms.uTime.value = time / 1e3;
       this.mat.uniforms.uStrength.value = this.strength;
+      this.mat.uniforms.uAttractor.value.copy(this.attractor);
+      this.mat.uniforms.uFloatProgress.value = this.floatProgress;
 
       this.renderer.render(this.scene, this.camera);
     }
