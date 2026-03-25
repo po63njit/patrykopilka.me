@@ -565,13 +565,189 @@ h3 {
 
 /* Main layout: latest + sidebar */
 
-.blog-main-wrap {
-  max-width: 960px;
+.blog-topic-shell {
   margin: 1.55rem auto 0;
-  padding: 0 1.5rem;
+  max-width: 980px;
+  padding: 0 1.35rem;
   display: grid;
-  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
-  gap: 1.7rem;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 1.05rem;
+}
+
+.blog-topic-nav {
+  background: linear-gradient(180deg, #091325 0%, #060d1a 100%);
+  border: 1px solid #1e2a41;
+  border-radius: 0.9rem;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.blog-topic-nav-header {
+  border-bottom: 1px solid rgba(100, 116, 139, 0.42);
+  padding: 0.2rem 0.2rem 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.blog-topic-nav-header h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.05rem;
+}
+
+.blog-topic-nav-header p {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.blog-topic-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.72rem;
+  color: #cbd5e1;
+  text-align: left;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 0.65rem;
+  padding: 0.7rem;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.blog-topic-btn:hover,
+.blog-topic-btn:focus-visible {
+  border-color: rgba(71, 85, 105, 0.9);
+  background: rgba(148, 163, 184, 0.1);
+  transform: translateX(1px);
+}
+
+.blog-topic-btn.active {
+  border-color: rgba(99, 102, 241, 0.8);
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.34), rgba(59, 130, 246, 0.16));
+  box-shadow: inset 3px 0 0 #818cf8;
+}
+
+.blog-topic-btn-index {
+  color: #93c5fd;
+  font-size: 0.67rem;
+  letter-spacing: 0.14em;
+}
+
+.blog-topic-btn-title {
+  display: block;
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.blog-topic-btn-subtitle {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.73rem;
+}
+
+.blog-topic-btn-count {
+  color: #93c5fd;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 999px;
+  min-width: 1.7rem;
+  padding: 0.12rem 0.4rem;
+  text-align: center;
+  font-size: 0.72rem;
+}
+
+.blog-topic-panels {
+  background: #ffffff;
+  border: 1px solid #d8e2ef;
+  border-radius: 0.9rem;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.blog-topic-panel {
+  display: none;
+  padding: 1.2rem 1.25rem 1.3rem;
+}
+
+.blog-topic-panel.active {
+  display: block;
+}
+
+.blog-topic-panel + .blog-topic-panel {
+  border-top: 1px solid #e5e7eb;
+}
+
+.blog-topic-panel-header h2 {
+  margin: 0;
+  font-size: 1.36rem;
+}
+
+.blog-topic-panel-header p {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.blog-topic-panel-kicker {
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.67rem;
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+.blog-topic-lead {
+  margin-top: 1rem;
+  border: 1px solid #d8e2ef;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(160deg, #f8fbff, #eef4ff);
+}
+
+.blog-topic-lead h3 {
+  margin: 0;
+}
+
+.blog-topic-lead-excerpt {
+  color: #4b5563;
+  margin: 0.45rem 0 0;
+}
+
+.blog-topic-list {
+  margin: 0.95rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+.blog-topic-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.blog-topic-list li:last-child {
+  border-bottom: 0;
+}
+
+.blog-topic-list a {
+  color: #111827;
+  text-decoration: none;
+}
+
+.blog-topic-list span {
+  color: #94a3b8;
+  font-size: 0.75rem;
 }
 
 .blog-section-heading {
@@ -782,7 +958,7 @@ h3 {
 /* Responsive for smaller screens */
 
 @media (max-width: 768px) {
-  .blog-main-wrap {
+  .blog-topic-shell {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -801,11 +977,12 @@ h3 {
     padding: 1.25rem 1.4rem 1.6rem;
   }
 
-  .blog-nav-strip {
-    flex-wrap: wrap;
+  .blog-topic-btn {
+    grid-template-columns: auto 1fr;
   }
 
-  .blog-nav-item {
-    flex: 1 1 calc(50% - 0.4rem);
+  .blog-topic-btn-count {
+    justify-self: start;
+    margin-left: 1.9rem;
   }
 }
