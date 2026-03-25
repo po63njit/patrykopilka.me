@@ -51,6 +51,8 @@ body {
 .retro-nav {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.16rem;
   color: #67ff9a;
   text-transform: uppercase;
@@ -103,6 +105,49 @@ body {
     inset 0 0 0 1px rgba(44, 168, 80, 0.4),
     0 0 14px rgba(64, 255, 135, 0.55);
   outline: none;
+}
+
+@media (max-width: 840px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  .retro-nav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.32rem;
+  }
+
+  .retro-nav a {
+    min-width: 0;
+    flex: 1 1 calc(50% - 0.4rem);
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-header {
+    align-items: center;
+  }
+
+  .retro-nav {
+    justify-content: center;
+  }
+
+  .retro-nav__edge {
+    width: auto;
+    padding: 0 0.2rem;
+    font-size: 1.4rem;
+  }
+
+  .retro-nav a {
+    flex-basis: calc(100% - 0.4rem);
+    width: 100%;
+    font-size: 0.88rem;
+    letter-spacing: 0.045em;
+  }
 }
 
 .container {
