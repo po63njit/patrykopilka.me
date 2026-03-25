@@ -86,35 +86,42 @@ const latestPosts = posts
       </>
     )}
   </section>
-  <script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+      "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
   class Rays {
     constructor(container) {
       this.container = container;
       this.width = this.container.clientWidth;
       this.height = this.container.clientHeight;
       this.rays = [];
+      this.resizeHandler = this.resizeHandler.bind(this);
+      this.tick = this.tick.bind(this);
       this.init();
     }
 
     init() {
       this.resizeHandler();
-      window.addEventListener("resize", this.resizeHandler.bind(this));
-      requestAnimationFrame(this.tick.bind(this));
+      window.addEventListener("resize", this.resizeHandler);
+      requestAnimationFrame(this.tick);
     }
 
     resizeHandler() {
       this.width = this.container.clientWidth;
       this.height = this.container.clientHeight;
-      this.emit();
-    }
-
-    emit() {
       this.rays = [];
-      this.totalRays = this.height * 0.75;
-
-      for (let i = 0; i < this.totalRays; i++) {
-        this.rays.push(new Ray(this));
-      }
+      const totalRays = this.height * 0.75;
+      for (let i = 0; i < totalRays; i++) this.rays.push(new Ray(this));
     }
 
     tick() {
@@ -123,9 +130,8 @@ const latestPosts = posts
         ray.tick();
         path += ray.d;
       });
-
       this.container.style.clipPath = `path("${path}")`;
-      requestAnimationFrame(this.tick.bind(this));
+      requestAnimationFrame(this.tick);
     }
   }
 
@@ -133,31 +139,271 @@ const latestPosts = posts
     constructor(emitter) {
       this.emitter = emitter;
       const gap = 12;
-
       this.x = Math.random() * this.emitter.width;
-      this.y =
-        Math.floor(Math.random() * (this.emitter.height / gap + 1)) * gap;
-
+      this.y = Math.floor(Math.random() * (this.emitter.height / gap + 1)) * gap;
       this.width = 50 * Math.random();
       this.velocity = 0.25 + this.width / 50;
-
       this.d = "";
     }
 
-    update() {
+    tick() {
       this.x += this.velocity;
-      if (this.x > this.emitter.width) {
-        this.x = -this.width;
-      }
+      if (this.x > this.emitter.width) this.x = -this.width;
+      this.d = `M ${this.x},${this.y} h ${this.width} v 1 h -${this.width} z `;
+    }
+  }
+
+  class FerroFluidFallback {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d");
+      this.dpr = window.devicePixelRatio || 1;
+      this.time = 0;
+      this.center = { x: 0, y: 0 };
+      this.radius = 0;
+      this.resize = this.resize.bind(this);
+      this.tick = this.tick.bind(this);
+      this.resize();
+      window.addEventListener("resize", this.resize);
+      requestAnimationFrame(this.tick);
     }
 
-    draw() {
-      this.d = `M ${this.x},${this.y} h ${this.width} v 1 h -${this.width} z `;
+    resize() {
+      const size = Math.min(window.innerWidth * 0.39, 430);
+      this.canvas.width = size * this.dpr;
+      this.canvas.height = size * this.dpr;
+      this.canvas.style.width = `${size}px`;
+      this.canvas.style.height = `${size}px`;
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      this.center = { x: size / 2, y: size / 2 };
+      this.radius = size * 0.26;
     }
 
     tick() {
-      this.update();
-      this.draw();
+      this.time += 0.02;
+      const ctx = this.ctx;
+      const w = this.canvas.width / this.dpr;
+      const h = this.canvas.height / this.dpr;
+      ctx.clearRect(0, 0, w, h);
+      ctx.beginPath();
+      for (let i = 0; i <= 150; i++) {
+        const t = (i / 150) * Math.PI * 2;
+        const wobble = Math.sin(t * 11 + this.time * 2.4) * 4 + Math.cos(t * 17 - this.time * 3.1) * 3;
+        const r = this.radius + wobble;
+        const x = this.center.x + Math.cos(t) * r;
+        const y = this.center.y + Math.sin(t) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      const g = ctx.createRadialGradient(this.center.x - this.radius * 0.35, this.center.y - this.radius * 0.35, this.radius * 0.1, this.center.x, this.center.y, this.radius * 1.3);
+      g.addColorStop(0, "#15383a");
+      g.addColorStop(0.35, "#07181a");
+      g.addColorStop(1, "#010506");
+      ctx.fillStyle = g;
+      ctx.fill();
+      requestAnimationFrame(this.tick);
+    }
+  }
+
+  class FerroParticleSphere {
+    constructor(canvas, hero) {
+      this.canvas = canvas;
+      this.hero = hero;
+      this.pointer = new THREE.Vector2(0, 0);
+      this.offset = new THREE.Vector3(0, 0, 0);
+      this.targetOffset = new THREE.Vector3(0, 0, 0);
+      this.strength = 0;
+      this.targetStrength = 0;
+      this.time = 0;
+
+      this.initThree();
+      this.bindEvents();
+      this.resize();
+      this.animate = this.animate.bind(this);
+      requestAnimationFrame(this.animate);
+    }
+
+    initThree() {
+      this.scene = new THREE.Scene();
+      this.scene.fog = new THREE.FogExp2(0x000000, 0.025);
+
+      this.camera = new THREE.PerspectiveCamera(56, 1, 0.1, 1000);
+      this.camera.position.set(0, 1.7, 13.5);
+
+      this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      this.renderer.setClearColor(0x000000, 0);
+
+      this.controls = new OrbitControls(this.camera, this.canvas);
+      this.controls.enablePan = false;
+      this.controls.enableZoom = false;
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.autoRotate = true;
+      this.controls.autoRotateSpeed = 0.18;
+
+      this.pointMaterialShader = {
+        vertexShader: `
+          attribute float size;
+          varying vec3 vColor;
+          uniform float time;
+          void main() {
+            vColor = color;
+            vec3 pos = position;
+            pos.x += sin(time + position.z * 0.55) * 0.06;
+            pos.y += cos(time + position.x * 0.5) * 0.06;
+            pos.z += sin(time + position.y * 0.45) * 0.06;
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            float pulse = sin(time * 2.4 + length(position)) * 0.15 + 1.0;
+            gl_PointSize = size * (280.0 / -mvPosition.z) * pulse;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vColor;
+          uniform float time;
+          void main() {
+            vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+            float r = dot(cxy, cxy);
+            if (r > 1.0) discard;
+            float glow = exp(-r * 2.8);
+            float aura = exp(-r * 1.2) * 0.38;
+            vec3 theme = vec3(0.15, 0.95, 0.72);
+            vec3 finalColor = vColor * (1.05 + sin(time * 0.6) * 0.08) + theme * aura * 0.35;
+            gl_FragColor = vec4(finalColor, glow + aura * 0.55);
+          }
+        `,
+      };
+
+      const sphereColors = [
+        new THREE.Color(0x56ffd8).multiplyScalar(0.75),
+        new THREE.Color(0x38d9ff).multiplyScalar(0.7),
+        new THREE.Color(0x2bcf9d).multiplyScalar(0.78),
+        new THREE.Color(0x57ffea).multiplyScalar(0.68),
+      ];
+
+      this.coreSphere = this.createSpiralSphere(3.7, 18000, sphereColors);
+      this.orbitRings = this.createOrbitRings(5.3, 5, 0.34);
+      this.mainGroup = new THREE.Group();
+      this.mainGroup.add(this.coreSphere);
+      this.mainGroup.add(this.orbitRings);
+      this.scene.add(this.mainGroup);
+    }
+
+    createSpiralSphere(radius, particleCount, colors) {
+      const geometry = new THREE.BufferGeometry();
+      const positions = [];
+      const particleColors = [];
+      const sizes = [];
+      for (let i = 0; i < particleCount; i++) {
+        const phi = Math.acos(-1 + (2 * i) / particleCount);
+        const theta = Math.sqrt(particleCount * Math.PI) * phi;
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        positions.push(x, y, z);
+        const colorPos = i / particleCount;
+        const color1 = colors[Math.floor(colorPos * (colors.length - 1))];
+        const color2 = colors[Math.ceil(colorPos * (colors.length - 1))];
+        const mixRatio = (colorPos * (colors.length - 1)) % 1;
+        const finalColor = new THREE.Color().lerpColors(color1, color2, mixRatio);
+        particleColors.push(finalColor.r, finalColor.g, finalColor.b);
+        sizes.push(Math.random() * 0.12 + 0.06);
+      }
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.Float32BufferAttribute(particleColors, 3));
+      geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+      const material = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 } }, vertexShader: this.pointMaterialShader.vertexShader, fragmentShader: this.pointMaterialShader.fragmentShader, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+      return new THREE.Points(geometry, material);
+    }
+
+    createOrbitRings(radius, count, thickness) {
+      const group = new THREE.Group();
+      for (let i = 0; i < count; i++) {
+        const ringGeometry = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+        const sizes = [];
+        const particleCount = 1800;
+        for (let j = 0; j < particleCount; j++) {
+          const angle = (j / particleCount) * Math.PI * 2;
+          const rv = radius + (Math.random() - 0.5) * thickness;
+          positions.push(Math.cos(angle) * rv, (Math.random() - 0.5) * thickness, Math.sin(angle) * rv);
+          const c = new THREE.Color(0x54ffd8).offsetHSL((j / particleCount) * 0.08, 0, (Math.random() - 0.5) * 0.08);
+          colors.push(c.r, c.g, c.b);
+          sizes.push(Math.random() * 0.11 + 0.05);
+        }
+        ringGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+        ringGeometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+        ringGeometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+        const material = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 } }, vertexShader: this.pointMaterialShader.vertexShader, fragmentShader: this.pointMaterialShader.fragmentShader, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+        const ring = new THREE.Points(ringGeometry, material);
+        ring.rotation.x = Math.random() * Math.PI;
+        ring.rotation.y = Math.random() * Math.PI;
+        group.add(ring);
+      }
+      return group;
+    }
+
+    bindEvents() {
+      this.resize = this.resize.bind(this);
+      window.addEventListener("resize", this.resize);
+      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
+        planet.addEventListener("pointerenter", (e) => this.handleMagnet(e, 1.0));
+        planet.addEventListener("pointerdown", (e) => this.handleMagnet(e, 1.45));
+        planet.addEventListener("focus", (e) => this.handleMagnet(e, 1.2));
+        planet.addEventListener("pointerleave", () => { this.targetStrength = 0; });
+        planet.addEventListener("blur", () => { this.targetStrength = 0; });
+      });
+    }
+
+    handleMagnet(event, strength) {
+      const planet = event.currentTarget instanceof Element ? event.currentTarget : null;
+      if (!planet) return;
+      const heroRect = this.hero.getBoundingClientRect();
+      const rect = planet.getBoundingClientRect();
+      const nx = ((rect.left + rect.width / 2 - heroRect.left) / heroRect.width) * 2 - 1;
+      const ny = -((((rect.top + rect.height / 2 - heroRect.top) / heroRect.height) * 2) - 1);
+      this.pointer.set(nx, ny);
+      this.targetStrength = strength;
+    }
+
+    resize() {
+      const size = Math.min(window.innerWidth * 0.4, 440);
+      this.canvas.style.width = `${size}px`;
+      this.canvas.style.height = `${size}px`;
+      this.renderer.setSize(size, size, false);
+      this.camera.aspect = 1;
+      this.camera.updateProjectionMatrix();
+    }
+
+    animate() {
+      requestAnimationFrame(this.animate);
+      this.time += 0.0022;
+      this.strength += (this.targetStrength - this.strength) * 0.085;
+      this.targetStrength *= 0.985;
+
+      this.targetOffset.set(this.pointer.x * this.strength * 1.9, this.pointer.y * this.strength * 1.5, 0);
+      this.offset.lerp(this.targetOffset, 0.12);
+      this.mainGroup.position.copy(this.offset);
+
+      this.coreSphere.material.uniforms.time.value = this.time;
+      this.orbitRings.children.forEach((ring) => {
+        ring.material.uniforms.time.value = this.time;
+      });
+      this.coreSphere.rotation.y += 0.0012;
+      this.coreSphere.rotation.x = Math.sin(this.time * 0.5) * 0.14;
+      this.orbitRings.children.forEach((ring, index) => {
+        const speed = 0.001 * (Math.sin(this.time * 0.2) + 2.0) * (index + 1);
+        ring.rotation.z += speed;
+        ring.rotation.x += speed * 0.6;
+        ring.rotation.y += speed * 0.4;
+      });
+
+      const breathe = 1 + Math.sin(this.time * 1.5) * 0.08 + this.strength * 0.06;
+      this.coreSphere.scale.set(breathe, breathe, breathe);
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
     }
   }
 
@@ -167,219 +413,15 @@ const latestPosts = posts
 
     const ferroCanvas = document.querySelector(".ferro-canvas");
     const hero = document.querySelector(".hero");
-    if (ferroCanvas && hero) new FerroFluid(ferroCanvas, hero);
+    if (!(ferroCanvas instanceof HTMLCanvasElement) || !(hero instanceof HTMLElement)) return;
+
+    try {
+      new FerroParticleSphere(ferroCanvas, hero);
+    } catch (error) {
+      console.error("WebGL ferrofluid failed, using fallback:", error);
+      new FerroFluidFallback(ferroCanvas);
+    }
   });
-
-  class FerroFluid {
-    constructor(canvas, hero) {
-      this.canvas = canvas;
-      this.ctx = this.canvas.getContext("2d");
-      this.hero = hero;
-      this.dpr = window.devicePixelRatio || 1;
-      this.center = { x: 0, y: 0 };
-      this.baseRadius = 80;
-      this.time = 0;
-      this.targetStrength = 0;
-      this.strength = 0;
-      this.targetPoint = { x: 0, y: 0 };
-      this.magnet = null;
-
-      this.resize = this.resize.bind(this);
-      this.handlePointer = this.handlePointer.bind(this);
-      this.handleClick = this.handleClick.bind(this);
-      this.handleTouch = this.handleTouch.bind(this);
-      this.handlePlanetActivate = this.handlePlanetActivate.bind(this);
-      this.tick = this.tick.bind(this);
-
-      this.resize();
-      window.addEventListener("resize", this.resize);
-      this.hero.addEventListener("pointermove", this.handlePointer);
-      this.hero.addEventListener("pointerdown", this.handleClick);
-      this.hero.addEventListener("touchstart", this.handleTouch, { passive: true });
-      this.hero.querySelectorAll(".planet-link").forEach((planet) => {
-        planet.addEventListener("pointerdown", this.handlePlanetActivate);
-        planet.addEventListener("touchstart", this.handlePlanetActivate, { passive: true });
-        planet.addEventListener("focus", this.handlePlanetActivate);
-      });
-      requestAnimationFrame(this.tick);
-    }
-
-    resize() {
-      const size = Math.min(window.innerWidth * 0.35, 360);
-      this.baseRadius = size * 0.26;
-      this.canvas.width = size * this.dpr;
-      this.canvas.height = size * this.dpr;
-      this.canvas.style.width = `${size}px`;
-      this.canvas.style.height = `${size}px`;
-      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-      this.center.x = size / 2;
-      this.center.y = size / 2;
-    }
-
-    handlePointer(event) {
-      const target = event.target instanceof Element ? event.target : null;
-      const planet = target ? target.closest(".planet-link") : null;
-      if (planet) {
-        const rect = planet.getBoundingClientRect();
-        const heroRect = this.hero.getBoundingClientRect();
-        this.magnet = {
-          x: rect.left + rect.width / 2 - heroRect.left,
-          y: rect.top + rect.height / 2 - heroRect.top,
-        };
-        this.targetStrength = 1;
-        return;
-      }
-
-      this.targetStrength = 0;
-      this.magnet = null;
-    }
-
-    handleClick(event) {
-      const heroRect = this.hero.getBoundingClientRect();
-      this.magnet = {
-        x: event.clientX - heroRect.left,
-        y: event.clientY - heroRect.top,
-      };
-      this.targetStrength = 1.4;
-    }
-
-    handleTouch(event) {
-      const touch = event.touches && event.touches[0];
-      if (!touch) return;
-
-      const heroRect = this.hero.getBoundingClientRect();
-      this.magnet = {
-        x: touch.clientX - heroRect.left,
-        y: touch.clientY - heroRect.top,
-      };
-      this.targetStrength = 1.45;
-    }
-
-    handlePlanetActivate(event) {
-      const target = event.currentTarget instanceof Element
-        ? event.currentTarget
-        : null;
-      if (!target) return;
-
-      const heroRect = this.hero.getBoundingClientRect();
-      const rect = target.getBoundingClientRect();
-      this.magnet = {
-        x: rect.left + rect.width / 2 - heroRect.left,
-        y: rect.top + rect.height / 2 - heroRect.top,
-      };
-      this.targetStrength = 1.35;
-    }
-
-    tick() {
-      this.time += 0.015;
-      this.strength += (this.targetStrength - this.strength) * 0.08;
-      this.targetStrength *= 0.985;
-
-      const rect = this.canvas.getBoundingClientRect();
-      const heroRect = this.hero.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2 - heroRect.left;
-      const cy = rect.top + rect.height / 2 - heroRect.top;
-
-      if (this.magnet) {
-        this.targetPoint.x = this.magnet.x - cx;
-        this.targetPoint.y = this.magnet.y - cy;
-      } else {
-        this.targetPoint.x *= 0.92;
-        this.targetPoint.y *= 0.92;
-      }
-
-      this.draw();
-      requestAnimationFrame(this.tick);
-    }
-
-    draw() {
-      const ctx = this.ctx;
-      const w = this.canvas.width / this.dpr;
-      const h = this.canvas.height / this.dpr;
-      ctx.clearRect(0, 0, w, h);
-
-      const angleToMagnet = Math.atan2(this.targetPoint.y, this.targetPoint.x);
-      const dist = Math.hypot(this.targetPoint.x, this.targetPoint.y);
-      const spikeInfluence = Math.min(1, dist / (w * 0.45)) * this.strength;
-      const points = 180;
-
-      ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        const t = (i / points) * Math.PI * 2;
-        const wobble =
-          Math.sin(t * 12 + this.time * 3.2) * 6 +
-          Math.sin(t * 18 - this.time * 4.1) * 4;
-        const delta = Math.abs(Math.atan2(Math.sin(t - angleToMagnet), Math.cos(t - angleToMagnet)));
-        const directionPull = Math.max(0, 1 - delta / 1.0);
-        const spike = Math.pow(directionPull, 2.2) * this.baseRadius * 0.95 * spikeInfluence;
-
-        const radius = this.baseRadius + wobble + spike;
-        const x = this.center.x + Math.cos(t) * radius;
-        const y = this.center.y + Math.sin(t) * radius;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-
-      const bodyGrad = ctx.createRadialGradient(
-        this.center.x - this.baseRadius * 0.45,
-        this.center.y - this.baseRadius * 0.52,
-        this.baseRadius * 0.14,
-        this.center.x,
-        this.center.y + this.baseRadius * 0.15,
-        this.baseRadius * 1.35,
-      );
-      bodyGrad.addColorStop(0, "#1a1a1a");
-      bodyGrad.addColorStop(0.25, "#050505");
-      bodyGrad.addColorStop(0.65, "#010101");
-      bodyGrad.addColorStop(1, "#000000");
-      ctx.fillStyle = bodyGrad;
-      ctx.fill();
-
-      const rimGrad = ctx.createLinearGradient(
-        this.center.x - this.baseRadius,
-        this.center.y - this.baseRadius,
-        this.center.x + this.baseRadius,
-        this.center.y + this.baseRadius,
-      );
-      rimGrad.addColorStop(0, "rgba(255,255,255,0.18)");
-      rimGrad.addColorStop(0.5, "rgba(255,255,255,0.03)");
-      rimGrad.addColorStop(1, "rgba(0,0,0,0.55)");
-      ctx.strokeStyle = rimGrad;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-
-      const coreShade = ctx.createRadialGradient(
-        this.center.x + this.baseRadius * 0.15,
-        this.center.y + this.baseRadius * 0.25,
-        this.baseRadius * 0.2,
-        this.center.x,
-        this.center.y,
-        this.baseRadius * 1.2,
-      );
-      coreShade.addColorStop(0, "rgba(0,0,0,0)");
-      coreShade.addColorStop(1, "rgba(0,0,0,0.7)");
-      ctx.fillStyle = coreShade;
-      ctx.fill();
-
-      const highlight = ctx.createRadialGradient(
-        this.center.x - this.baseRadius * 0.36,
-        this.center.y - this.baseRadius * 0.4,
-        this.baseRadius * 0.08,
-        this.center.x - this.baseRadius * 0.3,
-        this.center.y - this.baseRadius * 0.35,
-        this.baseRadius * 0.52,
-      );
-      highlight.addColorStop(0, "rgba(255,255,255,0.24)");
-      highlight.addColorStop(0.45, "rgba(255,255,255,0.08)");
-      highlight.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.globalCompositeOperation = "screen";
-      ctx.fillStyle = highlight;
-      ctx.fill();
-      ctx.globalCompositeOperation = "source-over";
-    }
-  }
-</script>
+  </script>
 
 </BaseLayout>
