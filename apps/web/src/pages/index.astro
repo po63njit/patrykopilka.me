@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SaturnLink from '../components/SaturnLink.astro';
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('blog');
-const orbitRings = Array.from({ length: 24 });
 const apiBase =
   import.meta.env.PUBLIC_API_BASE || 'https://api.patrykopilka.me';
 
@@ -26,17 +26,12 @@ const latestPosts = posts
 
   <!-- Foreground content -->
   <div class="hero-inner">
-    <div class="hero-orbit">
-      <ball aria-hidden="true">
-        {orbitRings.map((_, i) => <u></u>)}
-      </ball>
-
-      <nav class="bubble-nav" aria-label="Main sections">
-        <a href="/blog" class="bubble bubble--blog"><span>Blog</span></a>
-        <a href="/resume" class="bubble bubble--resume"><span>Resume</span></a>
-        <a href="/about" class="bubble bubble--about"><span>About</span></a>
-      </nav>
-    </div>
+    <canvas class="ferro-canvas" aria-hidden="true"></canvas>
+    <nav class="planet-nav" aria-label="Main sections">
+      <SaturnLink href="/blog" label="Blog" className="planet-link--blog" />
+      <SaturnLink href="/resume" label="Resume" className="planet-link--resume" />
+      <SaturnLink href="/about" label="About" className="planet-link--about" />
+    </nav>
 
     <p class="hero-tagline">
       Computer Engineering student building from the metal up: RISC-V, GNSS,
@@ -168,8 +163,148 @@ const latestPosts = posts
   window.addEventListener("DOMContentLoaded", () => {
     const container = document.querySelector(".a-rays");
     if (container) new Rays(container);
+
+    const ferroCanvas = document.querySelector(".ferro-canvas");
+    const hero = document.querySelector(".hero");
+    if (ferroCanvas && hero) new FerroFluid(ferroCanvas, hero);
   });
+
+  class FerroFluid {
+    constructor(canvas, hero) {
+      this.canvas = canvas;
+      this.ctx = this.canvas.getContext("2d");
+      this.hero = hero;
+      this.dpr = window.devicePixelRatio || 1;
+      this.center = { x: 0, y: 0 };
+      this.baseRadius = 80;
+      this.time = 0;
+      this.targetStrength = 0;
+      this.strength = 0;
+      this.targetPoint = { x: 0, y: 0 };
+      this.magnet = null;
+
+      this.resize = this.resize.bind(this);
+      this.handlePointer = this.handlePointer.bind(this);
+      this.handleClick = this.handleClick.bind(this);
+      this.tick = this.tick.bind(this);
+
+      this.resize();
+      window.addEventListener("resize", this.resize);
+      this.hero.addEventListener("pointermove", this.handlePointer);
+      this.hero.addEventListener("pointerdown", this.handleClick);
+      requestAnimationFrame(this.tick);
+    }
+
+    resize() {
+      const size = Math.min(window.innerWidth * 0.35, 360);
+      this.baseRadius = size * 0.26;
+      this.canvas.width = size * this.dpr;
+      this.canvas.height = size * this.dpr;
+      this.canvas.style.width = `${size}px`;
+      this.canvas.style.height = `${size}px`;
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      this.center.x = size / 2;
+      this.center.y = size / 2;
+    }
+
+    handlePointer(event) {
+      const target = event.target instanceof Element ? event.target : null;
+      const planet = target ? target.closest(".planet-link") : null;
+      if (planet) {
+        const rect = planet.getBoundingClientRect();
+        const heroRect = this.hero.getBoundingClientRect();
+        this.magnet = {
+          x: rect.left + rect.width / 2 - heroRect.left,
+          y: rect.top + rect.height / 2 - heroRect.top,
+        };
+        this.targetStrength = 1;
+        return;
+      }
+
+      this.targetStrength = 0;
+      this.magnet = null;
+    }
+
+    handleClick(event) {
+      const heroRect = this.hero.getBoundingClientRect();
+      this.magnet = {
+        x: event.clientX - heroRect.left,
+        y: event.clientY - heroRect.top,
+      };
+      this.targetStrength = 1.4;
+    }
+
+    tick() {
+      this.time += 0.015;
+      this.strength += (this.targetStrength - this.strength) * 0.08;
+      this.targetStrength *= 0.985;
+
+      const rect = this.canvas.getBoundingClientRect();
+      const heroRect = this.hero.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2 - heroRect.left;
+      const cy = rect.top + rect.height / 2 - heroRect.top;
+
+      if (this.magnet) {
+        this.targetPoint.x = this.magnet.x - cx;
+        this.targetPoint.y = this.magnet.y - cy;
+      } else {
+        this.targetPoint.x *= 0.92;
+        this.targetPoint.y *= 0.92;
+      }
+
+      this.draw();
+      requestAnimationFrame(this.tick);
+    }
+
+    draw() {
+      const ctx = this.ctx;
+      const w = this.canvas.width / this.dpr;
+      const h = this.canvas.height / this.dpr;
+      ctx.clearRect(0, 0, w, h);
+
+      const angleToMagnet = Math.atan2(this.targetPoint.y, this.targetPoint.x);
+      const dist = Math.hypot(this.targetPoint.x, this.targetPoint.y);
+      const spikeInfluence = Math.min(1, dist / (w * 0.45)) * this.strength;
+      const points = 180;
+
+      ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        const t = (i / points) * Math.PI * 2;
+        const wobble =
+          Math.sin(t * 12 + this.time * 3.2) * 6 +
+          Math.sin(t * 18 - this.time * 4.1) * 4;
+        const delta = Math.abs(Math.atan2(Math.sin(t - angleToMagnet), Math.cos(t - angleToMagnet)));
+        const directionPull = Math.max(0, 1 - delta / 1.0);
+        const spike = Math.pow(directionPull, 2.2) * this.baseRadius * 0.95 * spikeInfluence;
+
+        const radius = this.baseRadius + wobble + spike;
+        const x = this.center.x + Math.cos(t) * radius;
+        const y = this.center.y + Math.sin(t) * radius;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+
+      const grad = ctx.createRadialGradient(
+        this.center.x - this.baseRadius * 0.4,
+        this.center.y - this.baseRadius * 0.5,
+        this.baseRadius * 0.18,
+        this.center.x,
+        this.center.y,
+        this.baseRadius * 1.4,
+      );
+      grad.addColorStop(0, "#2a2a2a");
+      grad.addColorStop(0.35, "#0f0f0f");
+      grad.addColorStop(1, "#020202");
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  }
 </script>
 
 </BaseLayout>
-

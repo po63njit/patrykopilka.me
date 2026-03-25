@@ -9,7 +9,7 @@
   --card: #0e141b;
 }
 
-/* SCSS color tokens used by bubbles & effects */
+/* SCSS color tokens used by home hero effects */
 $blk: #05070b;
 $white: #fff;
 $red: #d73a4d;
@@ -159,196 +159,125 @@ h3 {
   z-index: 2;
 }
 
-/* ===== Bubble nav (links styled as your bubbles) ===== */
+/* ===== Planet nav (clickable Saturn links) ===== */
 
-.bubble-nav {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-  pointer-events: none; /* only the bubbles themselves are clickable */
-}
-
-.bubble {
-  position: absolute;
-  width: 7rem;
-  height: 7rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: #f9fafb;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  pointer-events: auto;
-
-  box-shadow:
-    8rem 8rem 4rem -6rem rgba(darken($red, 50%), 0.5),
-    8rem 8rem 4rem -2rem rgba(adjust-hue($red, -200deg), 0.1),
-    8rem 8rem 4rem -2rem rgba(lighten($red, 50%), 0.05),
-    inset 16rem 16rem 4rem -6rem rgba(darken($red, 50%), 0.1),
-    inset 16rem 16rem 4rem -2rem rgba(lighten($red, 50%), 0.1),
-    10rem 10rem 4rem rgba(magenta, 0.1);
-  filter: contrast(1.1);
-  backdrop-filter: blur(4px);
-
-  &,
-  &::before,
-  &::after {
-    border-radius: 50%;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-shadow:
-      inset 2rem 0 5rem magenta,
-      inset 0 -2rem 5rem yellow,
-      inset 0 2rem 5rem blue,
-      inset -2rem 0 5rem cyan;
-    filter: contrast(1.5);
-    opacity: 0.7;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-shadow:
-      inset -3rem -3rem 2rem rgba(adjust-hue($red, -200deg), 0.1),
-      inset 0 0 1rem adjust-hue($red, -200deg),
-      inset 4rem 4rem 5rem rgba(darken($red, 50%), 0.1);
-    filter: blur(0.5rem);
-    opacity: 0.9;
-    background:
-      radial-gradient(
-        at 40% 40%,
-        lighten($red, 50%),
-        rgba(lighten($red, 50%), 0.1) 25%,
-        $none 30%,
-        $none,
-        darken($red, 50%)
-      ),
-      radial-gradient(
-        at 45% 65%,
-        rgba(adjust-hue($red, -200deg), 0.1),
-        rgba(adjust-hue($red, -200deg), 0.1) 20%,
-        $none 30%,
-        $none
-      ),
-      radial-gradient(
-        at 65% 50%,
-        rgba(magenta, 0.1),
-        rgba(magenta, 0.1) 10%,
-        $none 12%,
-        $none
-      ),
-      radial-gradient(
-        at 70% 30%,
-        rgba(lighten($red, 50%), 0.5),
-        rgba(lighten($red, 50%), 0.1) 8%,
-        $none 10%,
-        $none,
-        $none
-      );
-    scale: 0.95;
-    transform: translate3d(-1.5rem, -1.5rem, 0);
-  }
-}
-
-.bubble span {
+.planet-nav {
   position: relative;
+  width: min(800px, 100%);
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.ferro-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
-  transform: translateY(1px);
+  pointer-events: none;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
 }
 
-/* position each bubble around the orb, away from the sphere */
-.bubble--blog {
-  transform: translate3d(-190%, -40%, 80px);
+.planet-link {
+  --tx: 0%;
+  --ty: 0%;
+  position: absolute;
+  transform: translate3d(var(--tx), var(--ty), 0);
+  text-decoration: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f8fbff;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  transition: transform 220ms ease;
+  animation: planet-float 6s ease-in-out infinite;
 }
 
-.bubble--resume {
-  transform: translate3d(190%, -10%, 80px);
+.planet-link:hover {
+  transform: translate3d(var(--tx), var(--ty), 0) scale(1.07);
 }
 
-.bubble--about {
-  transform: translate3d(0%, 190%, 80px);
+.planet-link .saturn {
+  width: 185px;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.35));
 }
 
-/* floating animation */
-.bubble {
-  animation: bubble-float 6s ease-in-out infinite;
+.planet-link .planet-body circle {
+  fill: #aec7ff;
 }
 
-.bubble--blog {
-  animation-delay: -1s;
+.planet-link .planet-body path {
+  fill: #a1bbf5;
 }
 
-.bubble--resume {
-  animation-delay: -2.4s;
+.planet-link .belt-front path,
+.planet-link .belt-back path {
+  fill: #ffb0b0;
 }
 
-.bubble--about {
-  animation-delay: -4s;
+.planet-link .stars-front path,
+.planet-link .stars-back path {
+  fill: #fff;
 }
 
-@keyframes bubble-float {
+.planet-link--blog {
+  --tx: -180%;
+  --ty: -20%;
+  animation-delay: -0.8s;
+}
+
+.planet-link--resume {
+  --tx: 180%;
+  --ty: -5%;
+  animation-delay: -2.1s;
+}
+
+.planet-link--about {
+  --tx: 0%;
+  --ty: 165%;
+  animation-delay: -3.8s;
+}
+
+@keyframes planet-float {
   0%,
   100% {
-    transform: translate3d(var(--tx, 0), var(--ty, 0), 80px);
+    transform: translate3d(var(--tx), var(--ty), 0);
   }
   50% {
-    transform: translate3d(
-        calc(var(--tx, 0) * 1.04),
-        calc(var(--ty, 0) * 0.96),
-        110px
-      );
+    transform: translate3d(var(--tx), calc(var(--ty) - 9px), 0);
   }
 }
 
-/* let us tweak positions via CSS vars if needed later */
-.bubble--blog {
-  --tx: -190%;
-  --ty: -40%;
-}
-
-.bubble--resume {
-  --tx: 190%;
-  --ty: -10%;
-}
-
-.bubble--about {
-  --tx: 0%;
-  --ty: 190%;
-}
-
-/* Responsive tweaks */
-@media (max-width: 640px) {
-  .bubble {
-    width: 5.5rem;
-    height: 5.5rem;
-    font-size: 0.8rem;
+@media (max-width: 720px) {
+  .planet-nav {
+    min-height: 420px;
   }
 
-  .bubble--blog {
-    --tx: -155%;
+  .planet-link .saturn {
+    width: 145px;
+  }
+
+  .planet-link--blog {
+    --tx: -95%;
     --ty: -35%;
   }
 
-  .bubble--resume {
-    --tx: 155%;
-    --ty: -5%;
+  .planet-link--resume {
+    --tx: 95%;
+    --ty: -25%;
   }
 
-  .bubble--about {
+  .planet-link--about {
     --tx: 0%;
-    --ty: 155%;
+    --ty: 120%;
   }
 }
 
@@ -795,4 +724,3 @@ h3 {
   color: #1d4ed8;
   text-decoration: underline;
 }
-
