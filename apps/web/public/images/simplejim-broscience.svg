@@ -1,0 +1,30 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">SimpleJim BroScience Poster</title>
+  <desc id="desc">Solarpunk gym-themed poster reading BroScience 50% Fact 50% Magic 100% Results.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12231d"/>
+      <stop offset="0.55" stop-color="#0d1a16"/>
+      <stop offset="1" stop-color="#1f2f28"/>
+    </linearGradient>
+    <linearGradient id="solar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7ad66f"/>
+      <stop offset="1" stop-color="#ffd36a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <circle cx="1060" cy="90" r="110" fill="#ffd36a" opacity="0.18"/>
+  <circle cx="120" cy="560" r="190" fill="#7ad66f" opacity="0.14"/>
+
+  <rect x="70" y="86" width="1060" height="458" rx="28" fill="#08110f" opacity="0.58" stroke="#7ad66f" stroke-opacity="0.35"/>
+
+  <text x="120" y="170" fill="#98ebb0" font-size="52" font-family="Inter, Segoe UI, Arial, sans-serif" font-weight="700">SimpleJim</text>
+  <text x="120" y="220" fill="#d2f4d8" font-size="30" font-family="Inter, Segoe UI, Arial, sans-serif">Gym tracking, but make it bro-science.</text>
+
+  <text x="120" y="320" fill="#ffffff" font-size="86" font-family="Impact, Anton, Arial Black, sans-serif" font-weight="700">BROSCIENCE</text>
+  <text x="120" y="394" fill="#ffffff" font-size="62" font-family="Impact, Anton, Arial Black, sans-serif" font-weight="700">50% FACT</text>
+  <text x="120" y="460" fill="#ffffff" font-size="62" font-family="Impact, Anton, Arial Black, sans-serif" font-weight="700">50% MAGIC</text>
+  <text x="120" y="528" fill="url(#solar)" font-size="84" font-family="Impact, Anton, Arial Black, sans-serif" font-weight="900">100% RESULTS</text>
+</svg>
