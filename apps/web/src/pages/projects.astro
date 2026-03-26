@@ -140,16 +140,18 @@ const projects = [
   }
 
   .swiper {
-    width: 100%;
-    padding-top: 30px;
-    padding-bottom: 50px;
+    width: min(100%, 1200px);
+    margin-inline: auto;
+    padding-top: clamp(16px, 4vw, 42px);
+    padding-bottom: clamp(24px, 6vw, 56px);
   }
 
   .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 400px;
-    height: 500px;
+    width: clamp(240px, 68vw, 420px);
+    aspect-ratio: 4 / 5;
+    height: auto;
     border-radius: 14px;
     overflow: hidden;
     border: 1px solid rgba(122, 214, 111, 0.4);
@@ -233,4 +235,24 @@ const projects = [
     filter: brightness(1.08);
     outline: none;
   }
+
+  @media (max-width: 520px) {
+    .info {
+      height: 78%;
+      padding: 12px;
+    }
+
+    .info h2 {
+      font-size: 1.5rem;
+    }
+
+    .info p {
+      font-size: 0.86rem;
+    }
+
+    .info span {
+      font-size: 0.66rem;
+    }
+  }
+
 </style>
