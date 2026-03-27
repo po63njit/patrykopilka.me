@@ -3,53 +3,96 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const projects = [
   {
+    id: 'simplejim',
     name: 'SimpleJim',
     href: 'https://github.com/po63njit/SimpleJim',
     image: '/images/simplejim-broscience.svg',
     description: 'Kotlin + Compose workout logger with offline-first tracking and history.',
-    details: [
-      { label: 'Stack', value: 'Kotlin • Compose • Room' },
-      { label: 'Platform', value: 'Android' },
-      { label: 'Flow', value: 'Track, History, Repeat Last' },
-      { label: 'Storage', value: 'SQLite (Room), offline-first' },
-      { label: 'Slogan', value: '50% Fact • 50% Magic • 100% Results' },
-    ],
+    year: '2026',
+    category: 'Mobile',
+    stack: ['Kotlin', 'Jetpack Compose', 'Room'],
+    highlights: ['Offline-first tracking', 'History timeline', 'Repeat-last flow'],
+    screenshots: ['/images/simplejim-broscience.svg'],
+    featured: true,
   },
   {
+    id: 'jamguard',
     name: 'JamGuard',
     href: 'https://github.com/kyrtapaklipo/JamGuard',
     image: 'https://opengraph.githubassets.com/1/kyrtapaklipo/JamGuard',
     description: 'FPS anti-cheat project focused on fair online matches.',
-    details: [
-      { label: 'Category', value: 'Anti-cheat / Security' },
-      { label: 'Platform', value: 'Competitive FPS' },
-      { label: 'Focus', value: 'Detection + prevention' },
-      { label: 'Goal', value: 'Reduce unfair advantage' },
-      { label: 'Status', value: 'Active project' },
-    ],
+    year: '2026',
+    category: 'Security',
+    stack: ['TypeScript', 'Telemetry', 'Detection Rules'],
+    highlights: ['Detection + prevention model', 'Competitive integrity', 'Active development'],
+    screenshots: ['https://opengraph.githubassets.com/1/kyrtapaklipo/JamGuard'],
+    featured: true,
+  },
+  {
+    id: 'patrykopilka-web',
+    name: 'patrykopilka.me',
+    href: 'https://github.com/po63njit/patrykopilka.me',
+    image: 'https://opengraph.githubassets.com/1/po63njit/patrykopilka.me',
+    description: 'Personal website built with Astro and a custom retro UI direction.',
+    year: '2026',
+    category: 'Web',
+    stack: ['Astro', 'TypeScript', 'SCSS'],
+    highlights: ['Hybrid project experience', 'Content-driven pages', 'Cloudflare deployment'],
+    screenshots: ['https://opengraph.githubassets.com/1/po63njit/patrykopilka.me'],
+    featured: true,
+  },
+  {
+    id: 'coming-soon-1',
+    name: 'Curated Slot 4',
+    href: 'https://github.com/po63njit',
+    image: 'https://opengraph.githubassets.com/1/po63njit',
+    description: 'Reserved for your next manually curated featured build.',
+    year: 'TBD',
+    category: 'Lab',
+    stack: ['TBD'],
+    highlights: ['Add your next project here', 'Will appear in carousel + grid', 'Modal-ready structure'],
+    screenshots: ['https://opengraph.githubassets.com/1/po63njit'],
+    featured: true,
+  },
+  {
+    id: 'coming-soon-2',
+    name: 'Curated Slot 5',
+    href: 'https://github.com/po63njit',
+    image: 'https://opengraph.githubassets.com/1/po63njit?2',
+    description: 'Reserved for another featured project in your manual ordering.',
+    year: 'TBD',
+    category: 'Lab',
+    stack: ['TBD'],
+    highlights: ['Swap in when ready', 'Keeps 5-featured layout stable', 'Supports same modal flow'],
+    screenshots: ['https://opengraph.githubassets.com/1/po63njit?2'],
+    featured: true,
   },
 ];
+
+const featuredProjects = projects.filter((project) => project.featured).slice(0, 5);
+const categories = ['All', ...new Set(projects.map((project) => project.category))];
 ---
 
 <BaseLayout title="Projects — patrykopilka.me">
   <section class="projects-solar card">
     <p class="eyebrow">Projects</p>
-    <h1>Solarpunk Project Carousel</h1>
-    <p class="intro">Swipe through projects and open them on GitHub.</p>
+    <h1>Featured Projects</h1>
+    <p class="intro">Auto-rotating showcase with modal previews. Click any card for details and GitHub links.</p>
 
-    <div class="swiper" aria-label="Project cards carousel">
+    <div class="swiper" aria-label="Featured project carousel">
       <div class="swiper-wrapper">
-        {projects.map((project) => (
-          <article class="swiper-slide" style={`background-image:url('${project.image}')`}>
+        {featuredProjects.map((project) => (
+          <article class="swiper-slide" data-project-id={project.id} style={`background-image:url('${project.image}')`}>
+            <button class="slide-hitbox" type="button" data-open-project={project.id} aria-label={`Open details for ${project.name}`}></button>
             <div class="info">
+              <p class="mini">Featured</p>
               <h2>{project.name}</h2>
               <p>{project.description}</p>
-              {project.details.map((item) => (
-                <span title={item.label}>{item.value}</span>
-              ))}
-              <a href={project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.name} on GitHub`}>
-                View on GitHub ↗
-              </a>
+              <div class="meta-row">
+                <span>{project.category}</span>
+                <span>{project.year}</span>
+              </div>
+              <span class="modal-cta">Open Preview</span>
             </div>
           </article>
         ))}
@@ -58,45 +101,209 @@ const projects = [
     </div>
   </section>
 
+  <section class="projects-grid card" aria-labelledby="projects-grid-title">
+    <div class="grid-head">
+      <h2 id="projects-grid-title">Project Grid</h2>
+      <p>Manually curated order. Use filters to browse by category.</p>
+    </div>
+
+    <div class="chips" role="group" aria-label="Filter projects by category">
+      {categories.map((category, index) => (
+        <button
+          type="button"
+          class:list={["chip", { 'is-active': index === 0 }]}
+          data-filter={category}
+          aria-pressed={index === 0 ? 'true' : 'false'}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
+
+    <div class="grid" id="projects-grid">
+      {projects.map((project) => (
+        <article class="project-card" data-category={project.category} data-project-id={project.id}>
+          <button type="button" class="project-open" data-open-project={project.id} aria-label={`Open details for ${project.name}`}>
+            <img src={project.image} alt={`${project.name} preview`} loading="lazy" />
+            <div class="project-card__body">
+              <h3>{project.name}</h3>
+              <p>{project.description}</p>
+              <div class="project-meta">
+                <span>{project.category}</span>
+                <span>{project.year}</span>
+              </div>
+              <ul class="project-tags" aria-label={`${project.name} technologies`}>
+                {project.stack.map((tag) => (
+                  <li>{tag}</li>
+                ))}
+              </ul>
+            </div>
+          </button>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <aside class="project-modal" id="project-modal" hidden aria-hidden="true">
+    <div class="project-modal__backdrop" data-close-modal></div>
+    <div class="project-modal__panel" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close project preview">✕</button>
+      <div class="modal-hero">
+        <img id="project-modal-image" src="" alt="" />
+      </div>
+      <div class="modal-content">
+        <p class="mini" id="project-modal-category"></p>
+        <h3 id="project-modal-title"></h3>
+        <p id="project-modal-description"></p>
+
+        <section>
+          <h4>Key features</h4>
+          <ul id="project-modal-highlights"></ul>
+        </section>
+
+        <section>
+          <h4>Tech stack</h4>
+          <ul id="project-modal-stack" class="project-tags"></ul>
+        </section>
+
+        <div class="modal-actions">
+          <a id="project-modal-github" href="#" target="_blank" rel="noreferrer">View on GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script type="application/json" id="projects-data">{JSON.stringify(projects)}</script>
+
   <script type="module" is:inline>
     import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+    const projects = JSON.parse(document.getElementById('projects-data')?.textContent || '[]');
+    const projectsById = new Map(projects.map((project) => [project.id, project]));
 
     const swiper = new Swiper('.swiper', {
       effect: 'coverflow',
       loop: true,
       grabCursor: true,
       centeredSlides: true,
-      slidesPerView: '1',
+      slidesPerView: 1,
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+      },
       coverflowEffect: {
-        rotate: 50,
+        rotate: 20,
         stretch: 0,
-        depth: 100,
+        depth: 110,
         modifier: 1,
-        slideShadows: true,
+        slideShadows: false,
       },
       pagination: {
         el: '.swiper-pagination',
+        clickable: true,
       },
       breakpoints: {
-        320: {
-          slidesPerView: 1.5,
+        680: {
+          slidesPerView: 1.35,
         },
-        580: {
-          slidesPerView: 2,
-        },
-        767: {
-          slidesPerView: 3,
-        },
-        992: {
-          slidesPerView: 3.5,
-        },
-        1200: {
-          slidesPerView: 4,
-        },
-        1400: {
-          slidesPerView: 4.5,
+        1024: {
+          slidesPerView: 1.6,
         },
       },
+    });
+
+    const modal = document.getElementById('project-modal');
+    const modalTitle = document.getElementById('project-modal-title');
+    const modalCategory = document.getElementById('project-modal-category');
+    const modalDescription = document.getElementById('project-modal-description');
+    const modalImage = document.getElementById('project-modal-image');
+    const modalStack = document.getElementById('project-modal-stack');
+    const modalHighlights = document.getElementById('project-modal-highlights');
+    const modalGithub = document.getElementById('project-modal-github');
+
+    const setModalList = (element, values) => {
+      if (!element) return;
+      element.innerHTML = '';
+      values.forEach((value) => {
+        const item = document.createElement('li');
+        item.textContent = value;
+        element.appendChild(item);
+      });
+    };
+
+    const openModal = (projectId) => {
+      const project = projectsById.get(projectId);
+      if (!project || !modal) return;
+
+      if (modalTitle) modalTitle.textContent = project.name;
+      if (modalCategory) modalCategory.textContent = `${project.category} • ${project.year}`;
+      if (modalDescription) modalDescription.textContent = project.description;
+
+      if (modalImage) {
+        modalImage.src = project.screenshots?.[0] || project.image;
+        modalImage.alt = `${project.name} screenshot`;
+      }
+
+      setModalList(modalStack, project.stack || []);
+      setModalList(modalHighlights, project.highlights || []);
+
+      if (modalGithub) modalGithub.href = project.href;
+
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      swiper.autoplay.stop();
+    };
+
+    const closeModal = () => {
+      if (!modal) return;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      swiper.autoplay.start();
+    };
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const openId = target.dataset.openProject;
+      if (openId) {
+        openModal(openId);
+        return;
+      }
+
+      if (target.dataset.closeModal !== undefined) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    const chips = Array.from(document.querySelectorAll('.chip'));
+    const cards = Array.from(document.querySelectorAll('.project-card'));
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const selected = chip.dataset.filter || 'All';
+
+        chips.forEach((button) => {
+          const active = button === chip;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+
+        cards.forEach((card) => {
+          const category = card.dataset.category;
+          const show = selected === 'All' || selected === category;
+          card.toggleAttribute('hidden', !show);
+        });
+      });
     });
   </script>
 </BaseLayout>
@@ -105,15 +312,14 @@ const projects = [
   @import url('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
 
   :root {
-    --tst: bottom 0.5s ease 0s;
-    --dark: #e6e6e6ee;
     --solar-leaf: #7ad66f;
     --solar-sun: #ffd36a;
     --solar-bg: #0e1b16;
     --solar-bg-soft: #132720;
   }
 
-  .projects-solar {
+  .projects-solar,
+  .projects-grid {
     background:
       radial-gradient(circle at 8% 5%, rgba(122, 214, 111, 0.22), transparent 35%),
       radial-gradient(circle at 85% 0%, rgba(255, 211, 106, 0.18), transparent 45%),
@@ -121,7 +327,12 @@ const projects = [
     border: 1px solid rgba(122, 214, 111, 0.33);
   }
 
-  .eyebrow {
+  .projects-grid {
+    margin-top: 1rem;
+  }
+
+  .eyebrow,
+  .mini {
     margin: 0;
     color: var(--solar-leaf);
     text-transform: uppercase;
@@ -140,27 +351,34 @@ const projects = [
   }
 
   .swiper {
-    width: min(100%, 1200px);
+    width: min(100%, 980px);
     margin-inline: auto;
-    padding-top: clamp(16px, 4vw, 42px);
-    padding-bottom: clamp(24px, 6vw, 56px);
+    padding-block: 2rem 3.5rem;
   }
 
   .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: clamp(240px, 68vw, 420px);
-    aspect-ratio: 4 / 5;
-    height: auto;
-    border-radius: 14px;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
     overflow: hidden;
-    border: 1px solid rgba(122, 214, 111, 0.4);
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(122, 214, 111, 0.38);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    position: relative;
+  }
+
+  .slide-hitbox {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    z-index: 1;
   }
 
   .swiper-pagination-bullet {
     background: #7ca184;
-    transition: all 0.5s ease 0s;
+    transition: all 0.35s ease 0s;
     border-radius: 8px;
   }
 
@@ -171,88 +389,280 @@ const projects = [
 
   .info {
     position: absolute;
-    width: calc(100% + 2px);
-    height: calc(74% + 2px);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0) 0, rgba(11, 19, 15, 0.75) 55px),
-      linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(8, 16, 12, 0.96));
-    padding: 14px;
-    left: 0;
-    bottom: calc(-100% - 3px);
-    box-sizing: border-box;
-    transition: var(--tst);
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .swiper-slide-active .info {
-    bottom: 0;
-    transition: var(--tst);
+    inset: auto 0 0 0;
+    background: linear-gradient(180deg, rgba(8, 16, 12, 0) 0%, rgba(8, 16, 12, 0.95) 62%);
+    padding: 3.2rem 1rem 1rem;
+    z-index: 2;
+    pointer-events: none;
   }
 
   .info h2 {
-    margin: 0;
+    margin: 0.15rem 0;
     color: #efffec;
-    font-size: 1.9rem;
+    font-size: clamp(1.2rem, 3vw, 1.9rem);
   }
 
   .info p {
-    margin: 0.2rem 0 0.4rem;
+    margin: 0;
     color: #d5f3d5;
     line-height: 1.35;
-    font-size: 0.95rem;
   }
 
-  .info span {
-    width: 100%;
-    margin: 0.2em 0;
-    display: inline-block;
-    padding: 0.5em 0.65em 0.5em 0.9em;
-    box-sizing: border-box;
-    color: var(--dark);
-    text-transform: uppercase;
-    font-size: 0.72rem;
-    border-radius: 2em;
-    background: linear-gradient(90deg, rgba(122, 214, 111, 0.22), rgba(255, 211, 106, 0.12));
-    border: 1px solid rgba(122, 214, 111, 0.38);
+  .meta-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
   }
 
-  .info a {
-    margin-top: 0.55rem;
-    width: fit-content;
-    text-decoration: none;
-    color: #082014;
-    background: linear-gradient(90deg, var(--solar-leaf), var(--solar-sun));
+  .meta-row span,
+  .modal-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.35rem 0.8rem;
+    border: 1px solid rgba(122, 214, 111, 0.4);
+    background: rgba(8, 16, 12, 0.76);
+    color: #eafce7;
+    font-size: 0.8rem;
+  }
+
+  .modal-cta {
+    margin-top: 0.8rem;
+    width: fit-content;
+    background: linear-gradient(90deg, rgba(122, 214, 111, 0.95), rgba(255, 211, 106, 0.95));
+    border-color: transparent;
+    color: #0d2819;
     font-weight: 700;
   }
 
-  .info a:hover,
-  .info a:focus-visible {
-    filter: brightness(1.08);
-    outline: none;
+  .grid-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    margin-bottom: 0.9rem;
   }
 
-  @media (max-width: 520px) {
-    .info {
-      height: 78%;
-      padding: 12px;
-    }
-
-    .info h2 {
-      font-size: 1.5rem;
-    }
-
-    .info p {
-      font-size: 0.86rem;
-    }
-
-    .info span {
-      font-size: 0.66rem;
-    }
+  .grid-head h2 {
+    margin: 0;
+    color: #e8ffe6;
   }
 
+  .grid-head p {
+    margin: 0;
+    color: #cfe8d0;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .chip {
+    border: 1px solid rgba(122, 214, 111, 0.5);
+    background: rgba(8, 16, 12, 0.72);
+    color: #d7f3d9;
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+  }
+
+  .chip.is-active {
+    color: #0d2819;
+    background: linear-gradient(90deg, var(--solar-leaf), var(--solar-sun));
+    border-color: transparent;
+    font-weight: 700;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .project-card {
+    border: 1px solid rgba(122, 214, 111, 0.35);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(8, 16, 12, 0.7);
+  }
+
+  .project-open {
+    all: unset;
+    display: block;
+    cursor: pointer;
+  }
+
+  .project-open img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+  }
+
+  .project-card__body {
+    padding: 0.85rem;
+  }
+
+  .project-card__body h3 {
+    margin: 0;
+    color: #efffec;
+    font-size: 1.05rem;
+  }
+
+  .project-card__body p {
+    margin: 0.3rem 0 0.65rem;
+    color: #d5f3d5;
+    font-size: 0.92rem;
+    min-height: 2.5rem;
+  }
+
+  .project-meta {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .project-meta span {
+    border: 1px solid rgba(122, 214, 111, 0.4);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+    color: #dff7de;
+  }
+
+  .project-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .project-tags li {
+    border-radius: 0.5rem;
+    background: rgba(122, 214, 111, 0.13);
+    border: 1px solid rgba(122, 214, 111, 0.38);
+    padding: 0.2rem 0.5rem;
+    color: #e4fae2;
+    font-size: 0.76rem;
+  }
+
+  .project-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+  }
+
+  .project-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+  }
+
+  .project-modal__panel {
+    position: relative;
+    width: min(900px, 95vw);
+    max-height: 92vh;
+    overflow: auto;
+    border-radius: 18px;
+    border: 1px solid rgba(122, 214, 111, 0.42);
+    background: linear-gradient(160deg, #0c1c15, #0f251b);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-close {
+    position: sticky;
+    top: 0.6rem;
+    margin-left: calc(100% - 3rem);
+    border: 1px solid rgba(122, 214, 111, 0.5);
+    background: rgba(6, 12, 9, 0.9);
+    color: #e8ffe6;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .modal-hero img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+  }
+
+  .modal-content {
+    padding: 0 1.2rem 1.3rem;
+  }
+
+  .modal-content h3 {
+    margin: 0.35rem 0;
+    color: #f2ffe9;
+    font-size: clamp(1.3rem, 2.6vw, 2rem);
+  }
+
+  .modal-content p {
+    color: #d8f2d7;
+  }
+
+  .modal-content h4 {
+    color: #efffec;
+    margin: 1rem 0 0.45rem;
+  }
+
+  .modal-content ul:not(.project-tags) {
+    margin: 0;
+    padding-left: 1rem;
+    color: #dff5df;
+  }
+
+  .modal-actions {
+    margin-top: 1.2rem;
+  }
+
+  .modal-actions a {
+    text-decoration: none;
+    color: #0a2316;
+    background: linear-gradient(90deg, var(--solar-leaf), var(--solar-sun));
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.45rem 0.95rem;
+    font-weight: 700;
+    display: inline-flex;
+  }
+
+  :global(body.modal-open) {
+    overflow: hidden;
+  }
+
+  @media (max-width: 720px) {
+    .project-modal {
+      padding: 0;
+      align-items: end;
+    }
+
+    .project-modal__panel {
+      width: 100%;
+      max-height: 92vh;
+      border-radius: 20px 20px 0 0;
+      animation: slide-up 220ms ease-out;
+    }
+
+    @keyframes slide-up {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+  }
 </style>
