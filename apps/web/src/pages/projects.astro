@@ -45,32 +45,40 @@ const projects = [
     id: 'coming-soon-1',
     name: 'Curated Slot 4',
     href: 'https://github.com/po63njit',
-    image: 'https://opengraph.githubassets.com/1/po63njit',
+    image: '/images/fallbacks/space-horizon.svg',
     description: 'Reserved for your next manually curated featured build.',
     year: 'TBD',
     category: 'Lab',
     stack: ['TBD'],
     highlights: ['Add your next project here', 'Will appear in carousel + grid', 'Modal-ready structure'],
-    screenshots: ['https://opengraph.githubassets.com/1/po63njit'],
+    screenshots: ['/images/fallbacks/space-horizon.svg'],
     featured: true,
   },
   {
     id: 'coming-soon-2',
     name: 'Curated Slot 5',
     href: 'https://github.com/po63njit',
-    image: 'https://opengraph.githubassets.com/1/po63njit?2',
+    image: '/images/fallbacks/sand-waves.svg',
     description: 'Reserved for another featured project in your manual ordering.',
     year: 'TBD',
     category: 'Lab',
     stack: ['TBD'],
     highlights: ['Swap in when ready', 'Keeps 5-featured layout stable', 'Supports same modal flow'],
-    screenshots: ['https://opengraph.githubassets.com/1/po63njit?2'],
+    screenshots: ['/images/fallbacks/sand-waves.svg'],
     featured: true,
   },
 ];
 
 const featuredProjects = projects.filter((project) => project.featured).slice(0, 5);
 const categories = ['All', ...new Set(projects.map((project) => project.category))];
+const fallbackImages = [
+  '/images/fallbacks/space-horizon.svg',
+  '/images/fallbacks/sand-waves.svg',
+  '/images/fallbacks/blue-ridges.svg',
+  '/images/fallbacks/green-soft.svg',
+  '/images/fallbacks/ocean-life.svg',
+  '/images/fallbacks/mountain-light.svg',
+];
 ---
 
 <BaseLayout title="Projects — patrykopilka.me">
@@ -82,8 +90,8 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     <div class="swiper" aria-label="Featured project carousel">
       <div class="swiper-wrapper">
         {featuredProjects.map((project) => (
-          <article class="swiper-slide" data-project-id={project.id} style={`background-image:url('${project.image}')`}>
-            <button class="slide-hitbox" type="button" data-open-project={project.id} aria-label={`Open details for ${project.name}`}></button>
+          <article class="swiper-slide" data-project-id={project.id}>
+            <img class="slide-bg" src={project.image} alt={`${project.name} featured image`} data-project-image={project.id} />
             <div class="info">
               <p class="mini">Featured</p>
               <h2>{project.name}</h2>
@@ -92,7 +100,9 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
                 <span>{project.category}</span>
                 <span>{project.year}</span>
               </div>
-              <span class="modal-cta">Open Preview</span>
+              <button class="modal-cta" type="button" data-open-project={project.id} aria-controls="project-modal" aria-label={`Open preview for ${project.name}`}>
+                Open Preview
+              </button>
             </div>
           </article>
         ))}
@@ -123,22 +133,25 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     <div class="grid" id="projects-grid">
       {projects.map((project) => (
         <article class="project-card" data-category={project.category} data-project-id={project.id}>
-          <button type="button" class="project-open" data-open-project={project.id} aria-label={`Open details for ${project.name}`}>
-            <img src={project.image} alt={`${project.name} preview`} loading="lazy" />
-            <div class="project-card__body">
-              <h3>{project.name}</h3>
-              <p>{project.description}</p>
-              <div class="project-meta">
-                <span>{project.category}</span>
-                <span>{project.year}</span>
-              </div>
-              <ul class="project-tags" aria-label={`${project.name} technologies`}>
-                {project.stack.map((tag) => (
-                  <li>{tag}</li>
-                ))}
-              </ul>
+          <img src={project.image} alt={`${project.name} preview`} loading="lazy" data-project-image={project.id} />
+          <div class="project-card__body">
+            <h3>{project.name}</h3>
+            <p>{project.description}</p>
+            <div class="project-meta">
+              <span>{project.category}</span>
+              <span>{project.year}</span>
             </div>
-          </button>
+            <ul class="project-tags" aria-label={`${project.name} technologies`}>
+              {project.stack.map((tag) => (
+                <li>{tag}</li>
+              ))}
+            </ul>
+            <div class="project-actions">
+              <button type="button" class="project-preview-btn" data-open-project={project.id} aria-controls="project-modal" aria-label={`Open preview for ${project.name}`}>
+                Preview
+              </button>
+            </div>
+          </div>
         </article>
       ))}
     </div>
@@ -146,7 +159,7 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
 
   <aside class="project-modal" id="project-modal" hidden aria-hidden="true">
     <div class="project-modal__backdrop" data-close-modal></div>
-    <div class="project-modal__panel" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+    <div class="project-modal__panel" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" aria-describedby="project-modal-description" tabindex="-1">
       <button class="modal-close" type="button" data-close-modal aria-label="Close project preview">✕</button>
       <div class="modal-hero">
         <img id="project-modal-image" src="" alt="" />
@@ -174,12 +187,36 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
   </aside>
 
   <script type="application/json" id="projects-data">{JSON.stringify(projects)}</script>
+  <script type="application/json" id="fallback-images-data">{JSON.stringify(fallbackImages)}</script>
 
   <script type="module" is:inline>
     import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
 
-    const projects = JSON.parse(document.getElementById('projects-data')?.textContent || '[]');
+    const parseJsonFrom = (id, fallback) => JSON.parse(document.getElementById(id)?.textContent || fallback);
+    const projects = parseJsonFrom('projects-data', '[]');
+    const fallbackImages = parseJsonFrom('fallback-images-data', '[]');
     const projectsById = new Map(projects.map((project) => [project.id, project]));
+    const fallbackByProjectId = new Map();
+    const modal = document.getElementById('project-modal');
+
+    const randomFallback = () => fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+    const getFallbackForProject = (projectId) => {
+      if (!projectId) return randomFallback();
+      if (!fallbackByProjectId.has(projectId)) {
+        fallbackByProjectId.set(projectId, randomFallback());
+      }
+      return fallbackByProjectId.get(projectId);
+    };
+
+    const handleImageFallback = (image, projectId) => {
+      if (!(image instanceof HTMLImageElement)) return;
+      image.onerror = () => {
+        const fallback = getFallbackForProject(projectId);
+        if (!fallback || image.dataset.fallbackApplied === 'true') return;
+        image.dataset.fallbackApplied = 'true';
+        image.src = fallback;
+      };
+    };
 
     const swiper = new Swiper('.swiper', {
       effect: 'coverflow',
@@ -187,40 +224,24 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
       grabCursor: true,
       centeredSlides: true,
       slidesPerView: 1,
-      autoplay: {
-        delay: 5000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      },
-      coverflowEffect: {
-        rotate: 20,
-        stretch: 0,
-        depth: 110,
-        modifier: 1,
-        slideShadows: false,
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-      breakpoints: {
-        680: {
-          slidesPerView: 1.35,
-        },
-        1024: {
-          slidesPerView: 1.6,
-        },
-      },
+      autoplay: { delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true },
+      coverflowEffect: { rotate: 20, stretch: 0, depth: 110, modifier: 1, slideShadows: false },
+      pagination: { el: '.swiper-pagination', clickable: true },
+      breakpoints: { 680: { slidesPerView: 1.35 }, 1024: { slidesPerView: 1.6 } },
     });
 
-    const modal = document.getElementById('project-modal');
-    const modalTitle = document.getElementById('project-modal-title');
-    const modalCategory = document.getElementById('project-modal-category');
-    const modalDescription = document.getElementById('project-modal-description');
-    const modalImage = document.getElementById('project-modal-image');
-    const modalStack = document.getElementById('project-modal-stack');
-    const modalHighlights = document.getElementById('project-modal-highlights');
-    const modalGithub = document.getElementById('project-modal-github');
+    const modalEls = {
+      title: document.getElementById('project-modal-title'),
+      category: document.getElementById('project-modal-category'),
+      description: document.getElementById('project-modal-description'),
+      image: document.getElementById('project-modal-image'),
+      stack: document.getElementById('project-modal-stack'),
+      highlights: document.getElementById('project-modal-highlights'),
+      github: document.getElementById('project-modal-github'),
+      closeButton: document.querySelector('.modal-close'),
+    };
+    let activeProjectId = null;
+    let lastOpenTrigger = null;
 
     const setModalList = (element, values) => {
       if (!element) return;
@@ -232,63 +253,95 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
       });
     };
 
-    const openModal = (projectId) => {
+    const toggleModalVisibility = (isVisible) => {
+      if (!modal) return;
+      modal.hidden = !isVisible;
+      modal.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+      document.body.classList.toggle('modal-open', isVisible);
+
+      if (isVisible) {
+        if (typeof modalEls.closeButton?.focus === 'function') modalEls.closeButton.focus();
+        if (swiper?.autoplay?.running) swiper.autoplay.stop();
+      } else if (!swiper?.autoplay?.running) {
+        swiper.autoplay.start();
+      }
+    };
+
+    const openModal = (projectId, trigger = null) => {
       const project = projectsById.get(projectId);
       if (!project || !modal) return;
 
-      if (modalTitle) modalTitle.textContent = project.name;
-      if (modalCategory) modalCategory.textContent = `${project.category} • ${project.year}`;
-      if (modalDescription) modalDescription.textContent = project.description;
-
-      if (modalImage) {
-        modalImage.src = project.screenshots?.[0] || project.image;
-        modalImage.alt = `${project.name} screenshot`;
+      activeProjectId = project.id;
+      if (trigger instanceof HTMLElement) {
+        lastOpenTrigger = trigger;
       }
 
-      setModalList(modalStack, project.stack || []);
-      setModalList(modalHighlights, project.highlights || []);
+      if (modalEls.title) modalEls.title.textContent = project.name;
+      if (modalEls.category) modalEls.category.textContent = `${project.category} • ${project.year}`;
+      if (modalEls.description) modalEls.description.textContent = project.description;
 
-      if (modalGithub) modalGithub.href = project.href;
+      if (modalEls.image) {
+        modalEls.image.src = project.screenshots?.[0] || project.image;
+        modalEls.image.alt = `${project.name} screenshot`;
+        modalEls.image.dataset.fallbackApplied = 'false';
+        handleImageFallback(modalEls.image, project.id);
+      }
 
-      modal.hidden = false;
-      modal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('modal-open');
-      swiper.autoplay.stop();
+      setModalList(modalEls.stack, project.stack || []);
+      setModalList(modalEls.highlights, project.highlights || []);
+
+      if (modalEls.github) modalEls.github.href = project.href;
+
+      toggleModalVisibility(true);
     };
 
     const closeModal = () => {
-      if (!modal) return;
-      modal.hidden = true;
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('modal-open');
-      swiper.autoplay.start();
+      if (!modal || modal.hidden) return;
+      activeProjectId = null;
+      toggleModalVisibility(false);
+      if (lastOpenTrigger instanceof HTMLElement) {
+        lastOpenTrigger.focus();
+      }
     };
 
-    document.addEventListener('click', (event) => {
+    const handleDocumentClick = (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
 
-      const openId = target.dataset.openProject;
+      const openTrigger = target.closest('[data-open-project]');
+      const openId = openTrigger instanceof HTMLElement ? openTrigger.dataset.openProject : undefined;
       if (openId) {
-        openModal(openId);
+        if (modal && activeProjectId === openId && modal.hidden === false) {
+          return;
+        }
+        openModal(openId, openTrigger);
         return;
       }
 
-      if (target.dataset.closeModal !== undefined) {
+      const closeTrigger = target.closest('[data-close-modal]');
+      if (closeTrigger) {
         closeModal();
       }
-    });
+    };
 
-    document.addEventListener('keydown', (event) => {
+    const handleDocumentKeydown = (event) => {
       if (event.key === 'Escape') {
         closeModal();
       }
-    });
+    };
 
     const chips = Array.from(document.querySelectorAll('.chip'));
     const cards = Array.from(document.querySelectorAll('.project-card'));
+    const projectImages = Array.from(document.querySelectorAll('[data-project-image]'));
 
-    chips.forEach((chip) => {
+    const attachImageFallbacks = () => projectImages.forEach((image) => {
+      if (image instanceof HTMLImageElement) {
+        const projectId = image.dataset.projectImage;
+        handleImageFallback(image, projectId);
+      }
+    });
+
+    const attachFilterChipHandlers = () => chips.forEach((chip) => {
       chip.addEventListener('click', () => {
         const selected = chip.dataset.filter || 'All';
 
@@ -305,6 +358,11 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
         });
       });
     });
+
+    attachImageFallbacks();
+    attachFilterChipHandlers();
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleDocumentKeydown);
   </script>
 </BaseLayout>
 
@@ -357,8 +415,6 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
   }
 
   .swiper-slide {
-    background-position: center;
-    background-size: cover;
     aspect-ratio: 16 / 10;
     border-radius: 16px;
     overflow: hidden;
@@ -367,13 +423,13 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     position: relative;
   }
 
-  .slide-hitbox {
+  .slide-bg {
     position: absolute;
     inset: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .swiper-pagination-bullet {
@@ -433,6 +489,8 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     border-color: transparent;
     color: #0d2819;
     font-weight: 700;
+    cursor: pointer;
+    pointer-events: auto;
   }
 
   .grid-head {
@@ -490,13 +548,7 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     background: rgba(8, 16, 12, 0.7);
   }
 
-  .project-open {
-    all: unset;
-    display: block;
-    cursor: pointer;
-  }
-
-  .project-open img {
+  .project-card img {
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
@@ -505,6 +557,9 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
 
   .project-card__body {
     padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 13.5rem;
   }
 
   .project-card__body h3 {
@@ -517,7 +572,7 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     margin: 0.3rem 0 0.65rem;
     color: #d5f3d5;
     font-size: 0.92rem;
-    min-height: 2.5rem;
+    min-height: 3.5rem;
   }
 
   .project-meta {
@@ -541,6 +596,13 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     gap: 0.35rem;
     margin: 0;
     padding: 0;
+    margin-top: auto;
+  }
+
+  .project-actions {
+    margin-top: 0.7rem;
+    display: flex;
+    justify-content: flex-end;
   }
 
   .project-tags li {
@@ -550,6 +612,27 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     padding: 0.2rem 0.5rem;
     color: #e4fae2;
     font-size: 0.76rem;
+  }
+
+  .project-preview-btn {
+    border: 1px solid transparent;
+    background: linear-gradient(90deg, var(--solar-leaf), var(--solar-sun));
+    color: #0b2316;
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .project-preview-btn:hover,
+  .project-preview-btn:focus-visible,
+  .modal-cta:hover,
+  .modal-cta:focus-visible,
+  .modal-actions a:hover,
+  .modal-actions a:focus-visible {
+    filter: brightness(1.08);
+    outline: 2px solid rgba(255, 211, 106, 0.45);
+    outline-offset: 2px;
   }
 
   .project-modal {
@@ -576,12 +659,13 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     border: 1px solid rgba(122, 214, 111, 0.42);
     background: linear-gradient(160deg, #0c1c15, #0f251b);
     box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
+    padding-top: 0.55rem;
   }
 
   .modal-close {
-    position: sticky;
-    top: 0.6rem;
-    margin-left: calc(100% - 3rem);
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
     border: 1px solid rgba(122, 214, 111, 0.5);
     background: rgba(6, 12, 9, 0.9);
     color: #e8ffe6;
@@ -589,7 +673,7 @@ const categories = ['All', ...new Set(projects.map((project) => project.category
     height: 2rem;
     border-radius: 999px;
     cursor: pointer;
-    z-index: 2;
+    z-index: 5;
   }
 
   .modal-hero img {
