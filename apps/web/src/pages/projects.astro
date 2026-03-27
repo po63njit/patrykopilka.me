@@ -255,6 +255,7 @@ const fallbackImages = [
 
     const toggleModalVisibility = (isVisible) => {
       if (!modal) return;
+      modal.classList.toggle('is-open', isVisible);
       modal.hidden = !isVisible;
       modal.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
       document.body.classList.toggle('modal-open', isVisible);
@@ -636,12 +637,20 @@ const fallbackImages = [
   }
 
   .project-modal {
+    display: none;
     position: fixed;
     inset: 0;
     z-index: 30;
-    display: grid;
     place-items: center;
     padding: 1rem;
+  }
+
+  .project-modal.is-open {
+    display: grid;
+  }
+
+  .project-modal[hidden] {
+    display: none !important;
   }
 
   .project-modal__backdrop {
