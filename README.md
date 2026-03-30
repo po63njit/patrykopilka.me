@@ -1,40 +1,58 @@
-# patrykopilka-site (Astro + Cloudflare Workers/Hono)
+# patrykopilka-site
 
-Monorepo: **Astro** blog/portfolio (Pages) + **Hono** API (Workers).
+Monorepo for **patrykopilka.me**, split into:
+- `apps/web`: Astro-powered portfolio/blog frontend
+- `apps/api`: Cloudflare Workers API built with Hono
+- `packages/ui`: shared UI package scaffold
+- `packages/lib`: shared utility package scaffold
 
-## Getting Started
+## Repository layout
 
-### Prerequisites
+```text
+.
+├── apps/
+│   ├── web/
+│   └── api/
+├── packages/
+│   ├── ui/
+│   └── lib/
+└── docs/
+```
+
+## Prerequisites
 
 - Node.js 20+
 - npm 10+
 
-### Install dependencies
+## Quick start
 
 ```bash
 npm install
-```
-
-### Run the web app (Astro)
-
-```bash
 npm run dev:web
 ```
 
-The web app runs from `apps/web`.
-
-### Run the API (Cloudflare Workers + Hono)
+Run API in a second terminal:
 
 ```bash
 npm run dev:api
 ```
 
-The API runs from `apps/api` using Wrangler.
+## Workspace scripts (root)
 
-### Environment notes
+- `npm run dev:web` – start Astro dev server
+- `npm run build:web` – build Astro app
+- `npm run dev:api` – start Wrangler local dev
+- `npm run deploy:api` – deploy API to Cloudflare Workers
+- `npm run test:api` – run API typecheck + tests
+- `npm run check` – run web build and API tests
 
-- The homepage links to `${PUBLIC_API_BASE}/health` when `PUBLIC_API_BASE` is set.
-- If you do not set `PUBLIC_API_BASE`, the API health link is not shown on the homepage.
+## Environment configuration
+
+### Web (`apps/web`)
+
+Optional variable:
+
+- `PUBLIC_API_BASE`: base URL used for the “Check API health” link on the homepage.
 
 Example:
 
@@ -42,8 +60,26 @@ Example:
 PUBLIC_API_BASE=http://127.0.0.1:8787 npm run dev:web
 ```
 
-### Durable Object notes
+### API (`apps/api`)
 
-- The API uses a Durable Object binding named `COUNTER_DO`.
-- `apps/api/wrangler.toml` already contains the binding and migration config for local/dev deployment.
-- The `/counter` route depends on this Durable Object to persist and increment the counter.
+The API uses a Durable Object binding named `COUNTER_DO` for `/counter` persistence.
+
+Config lives in:
+- `apps/api/wrangler.toml` (binding + migration)
+
+## Testing
+
+From repo root:
+
+```bash
+npm run test:api
+```
+
+This runs:
+1. TypeScript compile for test config
+2. Node test runner against `apps/api/test/index.test.mjs`
+
+## Documentation index
+
+- `docs/issue-task-proposals.md`: tracked maintenance tasks and status
+- `docs/future-change-suggestions.md`: proposed future improvements and priorities

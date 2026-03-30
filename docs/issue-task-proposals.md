@@ -1,72 +1,45 @@
-# Codebase Issue Task Proposals
+# Codebase Maintenance Task Tracker
 
-## 1) Typo task: fix homepage/blog banner copy typo
+This document tracks quality issues discovered during repository review and their implementation status.
 
-**Issue found**
-- The blog banner tagline currently reads: `Patrykverse, Anything that gets me on a deep dive I post here :)`.
-- `Anything` is capitalized mid-sentence after a comma, and the sentence reads like a copy typo rather than intentional punctuation.
+## Completed in this cleanup pass
 
-**Proposed task**
-- Update the banner copy to a polished sentence, e.g.:
-  - `Patrykverse — anything that sends me down a deep dive gets posted here.`
-- Keep tone/personality, but fix the typo-level copy quality issue.
+### 1) Copy typo cleanup: blog banner tagline
 
-**Acceptance criteria**
-- Banner text reads naturally and has no mid-sentence capitalization typo.
-- No layout regressions on the `/blog` page.
+- **Status:** ✅ Completed
+- **Result:** Blog banner copy uses polished sentence casing and punctuation.
+- **File:** `apps/web/src/pages/blog/index.astro`
 
----
+### 2) Resume contact data bug: missing LinkedIn
 
-## 2) Bug task: fix missing LinkedIn value on resume page
+- **Status:** ✅ Completed
+- **Result:** Resume contact list now includes a clickable LinkedIn URL.
+- **File:** `apps/web/src/pages/resume.astro`
 
-**Issue found**
-- The Resume page renders a `LinkedIn:` label with no link/value, unlike Email and GitHub.
-- This is a user-facing data bug (empty field in contact list).
+### 3) Root documentation completeness
 
-**Proposed task**
-- Add the missing LinkedIn URL (or remove the row until the URL is available).
-- Prefer a clickable anchor to match behavior/format of other contact items.
+- **Status:** ✅ Completed
+- **Result:** Root README now includes setup, scripts, environment notes, testing flow, and docs index.
+- **File:** `README.md`
 
-**Acceptance criteria**
-- `LinkedIn` row always renders either:
-  - a valid clickable profile URL, or
-  - does not render at all if the profile is not configured.
-- No empty label rows remain in the contact list.
+## Still recommended (next iterations)
 
----
+### 4) Expand API behavior tests
 
-## 3) Documentation discrepancy task: align README with actual local setup requirements
+- **Status:** 🟡 Pending
+- **Reason:** Core tests exist, but coverage can be improved.
 
-**Issue found**
-- Root README describes architecture at a high level, but does not document practical run/setup steps for both apps.
-- The API relies on Durable Objects and the web app references `PUBLIC_API_BASE`, but there is no clear documented developer setup path.
+**Recommended additions:**
+- assert `GET /health` contract fields and status code edge cases
+- validate `POST /echo` behavior across malformed payload variants
+- add deterministic counter behavior tests with isolated Durable Object state
 
-**Proposed task**
-- Expand README with a `Getting Started` section:
-  - install dependencies
-  - run `apps/web` and `apps/api`
-  - explain `PUBLIC_API_BASE`
-  - mention Durable Object migration/dev expectations for Wrangler
+### 5) CI automation
 
-**Acceptance criteria**
-- A new contributor can run web + API locally without guessing missing env/config.
-- README commands match current `package.json` scripts.
+- **Status:** 🟡 Pending
+- **Reason:** Local scripts exist, but CI enforcement is not documented.
 
----
-
-## 4) Test improvement task: add API behavior tests (health/echo/counter)
-
-**Issue found**
-- There are no automated tests for core API routes.
-- Critical behavior (counter increment, invalid JSON echo handling) can regress unnoticed.
-
-**Proposed task**
-- Add API tests (e.g., with Vitest + Miniflare or Workers test utilities) covering:
-  - `GET /health` returns `{ ok: true, service: ... }`
-  - `POST /echo` handles invalid JSON gracefully (`{}`)
-  - `GET /counter` increments count across sequential requests
-
-**Acceptance criteria**
-- Tests run in CI/local with one command.
-- Route-contract assertions exist for all three endpoints.
-- At least one negative-path test exists for malformed request payloads.
+**Recommended additions:**
+- run `npm run check` on every PR
+- fail on test/type errors
+- optionally cache npm dependencies for faster runs
