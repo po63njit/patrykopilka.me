@@ -1,66 +1,11 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AboutContent from "../components/AboutContent.astro";
 ---
-<BaseLayout title="About — patrykopilka.me">
-  <section class="about-solar card">
-    <div class="about-solar__left">
-      <p class="about-solar__eyebrow">About Me</p>
-      <h1 class="about-solar__title">
-        Engineering
-        <em>intelligent</em>
-        edge systems
-      </h1>
-      <p class="about-solar__intro">
-        Computer Engineering student building from the metal up: RISC-V, GNSS,
-        ML, and weird systems and hardware experiments.
-      </p>
-      <div class="about-solar__stats" aria-label="At a glance">
-        <article>
-          <p class="about-solar__stat-value">2+</p>
-          <p class="about-solar__stat-label">Years building</p>
-        </article>
-        <article>
-          <p class="about-solar__stat-value">12+</p>
-          <p class="about-solar__stat-label">Projects shipped</p>
-        </article>
-        <article>
-          <p class="about-solar__stat-value">5+</p>
-          <p class="about-solar__stat-label">Hardware prototypes</p>
-        </article>
-        <article>
-          <p class="about-solar__stat-value">6+</p>
-          <p class="about-solar__stat-label">Core technologies</p>
-        </article>
-      </div>
-    </div>
-    <div class="about-solar__right">
-      <section>
-        <h2>Intelligent Systems</h2>
-        <ul>
-          <li>Edge AI inference</li>
-          <li>TinyML deployment</li>
-          <li>Computer vision pipelines</li>
-          <li>Model optimization &amp; quantization</li>
-        </ul>
-      </section>
-      <section>
-        <h2>Embedded &amp; Robotics</h2>
-        <ul>
-          <li>RISC-V firmware</li>
-          <li>RTOS development</li>
-          <li>Sensor fusion (GNSS/IMU)</li>
-          <li>ROS 2 integration</li>
-        </ul>
-      </section>
-      <section>
-        <h2>Distributed Compute &amp; Security</h2>
-        <ul>
-          <li>Cloudflare Workers &amp; serverless APIs</li>
-          <li>WebAssembly at the edge</li>
-          <li>Zero-trust architecture</li>
-          <li>Telemetry &amp; observability</li>
-        </ul>
-      </section>
-    </div>
-  </section>
+
+<BaseLayout
+  title="About — Patryk Opilka"
+  description="Patryk Opilka, a Computer Engineering student working across hardware, software, and the systems between them."
+>
+  <AboutContent />
 </BaseLayout>

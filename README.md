@@ -12,7 +12,7 @@ Monorepo: **Astro** blog/portfolio (Pages) + **Hono** API (Workers).
 ### Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Run the web app (Astro)
@@ -31,16 +31,28 @@ npm run dev:api
 
 The API runs from `apps/api` using Wrangler.
 
-### Environment notes
-
-- The homepage links to `${PUBLIC_API_BASE}/health` when `PUBLIC_API_BASE` is set.
-- If you do not set `PUBLIC_API_BASE`, the API health link is not shown on the homepage.
-
-Example:
+### Build and test
 
 ```bash
-PUBLIC_API_BASE=http://127.0.0.1:8787 npm run dev:web
+ASTRO_TELEMETRY_DISABLED=1 npm run build:web
+npm --workspace web test
+npm --workspace web run check:orbit
+npm --workspace web run test:build
+npm --workspace api test
 ```
+
+The static site is generated in `apps/web/dist`. The portfolio does not need the API to render or navigate.
+
+### Deployment
+
+The repository's existing Cloudflare Pages integration builds the web app. GitHub Actions validates the build and tests; it does not deploy the API. Keep the existing Pages project and custom domain configuration. See [the publication checklist](docs/publication.md) for validation and rollback steps.
+
+### Content
+
+- The homepage uses the Orbital design and About uses Systems profile.
+- The résumé intentionally contains only the approved IBM summary and start date in `apps/web/src/data/experience.ts`.
+- Projects are placeholders. The prior project data and UI are preserved in `docs/archive/projects-before-cleanup.astro.txt` and Git history.
+- Blog posts live in `apps/web/src/content/blog`. A post with `draft: true` is excluded from the site, but its source is still public if committed to this public repository.
 
 ### Durable Object notes
 

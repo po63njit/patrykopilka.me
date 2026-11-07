@@ -1,19 +1,154 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { ibmExperience } from "../data/experience";
 ---
-<BaseLayout title="Resume — patrykopilka.me">
-  <h1>Resume</h1>
-  <section class="card">
-    <h2>Patryk Opilka</h2>
-    <p class="muted">
-    </p>
-    <ul>
-      <li>
-        <strong>Email:</strong> po63@njit.edu
-      </li>
-      <li>
-        <strong>GitHub:</strong> https://github.com/po63njit
-      </li>
-    </ul>
+
+<BaseLayout
+  title="Resume — Patryk Opilka"
+  description="Patryk Opilka’s resume. A fuller version is in progress."
+>
+  <section class="resume-page" aria-labelledby="resume-title">
+    <header class="resume-heading">
+      <p>Resume</p><span>In progress</span>
+    </header>
+    <div class="resume-intro">
+      <h1 id="resume-title">Patryk Opilka</h1>
+      <p>A fuller resume is in progress.</p>
+      <a href="mailto:po63@njit.edu"
+        >po63@njit.edu <span class="arrow-icon" aria-hidden="true"></span></a
+      >
+    </div>
+    <section class="resume-experience" aria-labelledby="ibm-title">
+      <div class="experience-meta">
+        <h2 id="ibm-title">{ibmExperience.company}</h2><p>
+          Started <time datetime={ibmExperience.startDate}
+            >{ibmExperience.startDateLabel}</time>
+        </p>
+      </div>
+      <p class="experience-summary">{ibmExperience.summary}</p>
+    </section>
+    <footer class="resume-links">
+      <a href="/about">About me</a><a
+        href="https://github.com/po63njit"
+        target="_blank"
+        rel="noreferrer">GitHub</a>
+    </footer>
   </section>
 </BaseLayout>
+
+<style>
+  .resume-page {
+    width: min(100%, 860px);
+    margin-inline: auto;
+    padding: 2rem 0 4rem;
+    color: #edf1ed;
+  }
+  .resume-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #2b3330;
+    font:
+      0.67rem/1.5 ui-monospace,
+      SFMono-Regular,
+      Consolas,
+      monospace;
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+  }
+  .resume-heading p {
+    margin: 0;
+    color: #a7f3d0;
+  }
+  .resume-heading > span {
+    color: #a2aca8;
+  }
+  .resume-intro {
+    min-height: 22rem;
+    padding-top: 4rem;
+  }
+  .resume-intro h1 {
+    color: #edf1ed;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.055em;
+    font-weight: 450;
+    margin: 0 0 1rem;
+  }
+  .resume-intro p {
+    color: #a2aca8;
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+  .resume-page a {
+    color: #a2aca8;
+    text-decoration: none;
+    font-size: 0.76rem;
+  }
+  .resume-page a:hover {
+    color: #a7f3d0;
+  }
+  .resume-intro a span {
+    margin-left: 0.7rem;
+  }
+  .resume-experience {
+    border-block: 1px solid #2b3330;
+    padding: 1.8rem 0 2rem;
+  }
+  .experience-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .experience-meta h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin: 0;
+  }
+  .experience-meta p {
+    font:
+      0.68rem/1.7 ui-monospace,
+      SFMono-Regular,
+      Consolas,
+      monospace;
+    color: #a2aca8;
+    margin: 0;
+  }
+  .experience-summary {
+    color: #a2aca8;
+    font-size: 0.87rem;
+    line-height: 1.85;
+    max-width: 36rem;
+    margin: 0;
+  }
+  .resume-links {
+    display: flex;
+    gap: 1.75rem;
+    margin-top: 1.6rem;
+  }
+  .resume-page a:focus-visible {
+    outline: 2px solid #a7f3d0;
+    outline-offset: 5px;
+  }
+  @media (max-width: 640px) {
+    .resume-page {
+      padding-top: 1rem;
+    }
+    .resume-intro {
+      min-height: 19rem;
+      padding-top: 3rem;
+    }
+    .experience-meta {
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .experience-summary {
+      font-size: 0.82rem;
+    }
+  }
+</style>

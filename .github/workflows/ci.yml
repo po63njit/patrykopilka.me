@@ -1,18 +1,21 @@
 name: ci
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 jobs:
   build-web:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
+    env:
+      ASTRO_TELEMETRY_DISABLED: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build
+      - run: npm --workspace web test
+      - run: npm --workspace web run check:orbit
+      - run: npm run build:web
+      - run: npm --workspace web run test:build
+      - run: npm --workspace api test

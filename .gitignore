@@ -25,3 +25,7 @@ Thumbs.db
 
 # Test build artifacts
 apps/api/.test-dist/
+
+# Local visual review output
+review/
+.openai/
