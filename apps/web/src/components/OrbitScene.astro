@@ -1,0 +1,307 @@
+---
+import SaturnLink from "./SaturnLink.astro";
+const { compact = false } = Astro.props;
+---
+
+<div class:list={["orbit-scene", { compact }]} data-orbit-scene>
+  <div class="scene-grid" aria-hidden="true"></div>
+  <svg
+    class="orbit-tracks"
+    viewBox="0 0 900 540"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    ><ellipse cx="450" cy="270" rx="328" ry="174"></ellipse><ellipse
+      class="track-secondary"
+      cx="450"
+      cy="270"
+      rx="372"
+      ry="213"></ellipse><path d="M450 30v28M450 482v28M32 270h28M840 270h28"
+    ></path></svg
+  >
+  <div class="cube-core" aria-hidden="true">
+    <svg class="cube-fallback" viewBox="0 0 220 220"
+      ><g fill="none" stroke="currentColor" stroke-width="1.2"
+        ><path
+          d="m110 25 70 40v80l-70 40-70-40V65Z M40 65l70 40 70-40 M110 105v80 M110 25v80"
+        ></path><path
+          opacity=".5"
+          d="m110 63 36 20v42l-36 21-36-21V83Z M74 83l36 21 36-21 M110 104v42 M110 63v41"
+        ></path></g
+      ></svg
+    >
+    <canvas class="cube-canvas"></canvas>
+  </div>
+  <nav class="planet-nav" aria-label="Explore the site with orbiting planets">
+    <div class="orbit-planet" data-angle="225" style="--x:-25%;--y:-24%">
+      <SaturnLink href="/blog" label="Writing" variant="earth" /><span
+        class="planet-coordinate"
+        aria-hidden="true">01 / FIELD NOTES</span>
+    </div>
+    <div class="orbit-planet" data-angle="315" style="--x:25%;--y:-24%">
+      <SaturnLink href="/resume" label="Résumé" variant="venus" /><span
+        class="planet-coordinate"
+        aria-hidden="true">02 / EXPERIENCE</span>
+    </div>
+    <div class="orbit-planet" data-angle="135" style="--x:-25%;--y:24%">
+      <SaturnLink href="/about" label="About" variant="saturn" /><span
+        class="planet-coordinate"
+        aria-hidden="true">03 / THE HUMAN</span>
+    </div>
+    <div class="orbit-planet" data-angle="45" style="--x:25%;--y:24%">
+      <SaturnLink href="/projects" label="Projects" variant="jupiter" /><span
+        class="planet-coordinate"
+        aria-hidden="true">04 / WORK IN PROGRESS</span>
+    </div>
+  </nav>
+  <span class="core-label" aria-hidden="true">THE CORE</span>
+  <div class="scene-caption">
+    <span><i></i> A small universe of ideas</span><button
+      type="button"
+      data-motion-toggle
+      aria-pressed="false"
+      hidden>Pause motion <span aria-hidden="true">Ⅱ</span></button>
+  </div>
+</div>
+<script>
+  import "../scripts/orbit-scene";
+</script>
+<style>
+  .orbit-scene {
+    position: relative;
+    height: 520px;
+    width: 100%;
+    isolation: isolate;
+  }
+  .scene-grid {
+    position: absolute;
+    inset: 12% 10%;
+    background-image:
+      linear-gradient(#a7f3d008 1px, transparent 1px),
+      linear-gradient(90deg, #a7f3d008 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(ellipse, #0005, transparent 70%);
+  }
+  .orbit-tracks {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: #a7f3d02b;
+    stroke-width: 0.8;
+  }
+  .track-secondary {
+    stroke: #a7f3d014;
+    stroke-dasharray: 2 8;
+  }
+  .cube-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 220px;
+    height: 220px;
+    transform: translate(-50%, -50%);
+    color: #a7f3d0;
+    filter: drop-shadow(0 0 16px #63f5c130);
+  }
+  .cube-canvas,
+  .cube-fallback {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .cube-canvas {
+    visibility: hidden;
+  }
+  .cube-core.is-ready .cube-canvas {
+    visibility: visible;
+  }
+  .cube-core.is-ready .cube-fallback {
+    visibility: hidden;
+  }
+  .core-label {
+    position: absolute;
+    top: calc(50% + 94px);
+    left: 50%;
+    transform: translateX(-50%);
+    font: 8px var(--mono);
+    letter-spacing: 0.3em;
+    color: #8ba19a;
+  }
+  .planet-nav {
+    position: absolute;
+    inset: 0;
+  }
+  .orbit-planet {
+    position: absolute;
+    left: calc(50% + var(--x));
+    top: calc(50% + var(--y));
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 142px;
+    will-change: left, top;
+  }
+  .orbit-planet :global(.planet-link) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--fg);
+    border-radius: 4px;
+  }
+  .orbit-planet :global(.planet-svg) {
+    width: 100px;
+    height: 100px;
+    overflow: visible;
+    transition:
+      filter 0.2s,
+      transform 0.2s;
+    filter: drop-shadow(0 8px 20px #0008);
+  }
+  .orbit-planet :global(.planet-link:hover .planet-svg),
+  .orbit-planet :global(.planet-link:focus-visible .planet-svg) {
+    filter: drop-shadow(0 0 16px #a7f3d055);
+    transform: scale(1.06);
+  }
+  .orbit-planet :global(.planet-svg--saturn) {
+    width: 118px;
+  }
+  .orbit-planet :global(.planet-body circle) {
+    fill: #a9c3ec;
+  }
+  .orbit-planet :global(.planet-body path) {
+    fill: #839fda;
+  }
+  .orbit-planet :global(.belt-front path),
+  .orbit-planet :global(.belt-back path) {
+    fill: #efbcb8;
+  }
+  .orbit-planet :global(.stars-front path),
+  .orbit-planet :global(.stars-back path) {
+    fill: #f4eee6;
+  }
+  .orbit-planet :global(.clouds ellipse) {
+    fill: #e7f7ffe6;
+  }
+  .orbit-planet :global(.venus-clouds path) {
+    fill: #ffd6ba;
+  }
+  .orbit-planet :global(.jupiter-clouds path) {
+    fill: #ffe5cf;
+  }
+  .planet-coordinate {
+    display: block;
+    font: 7px var(--mono);
+    letter-spacing: 0.12em;
+    color: #83948e;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+  .scene-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 10px var(--mono);
+    color: var(--muted);
+  }
+  .scene-caption i {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 9px;
+    box-shadow: 0 0 10px #a7f3d05e;
+  }
+  .scene-caption button {
+    border: 1px solid var(--line);
+    background: #0a1415c9;
+    padding: 9px 12px;
+    border-radius: 3px;
+    color: #b7c9c1;
+    font: 10px var(--mono);
+  }
+  .scene-caption button span {
+    margin-left: 12px;
+  }
+  .compact {
+    height: 500px;
+  }
+  .compact .planet-coordinate {
+    display: none;
+  }
+  .compact .orbit-planet {
+    width: 120px;
+  }
+  .compact .orbit-planet :global(.planet-svg) {
+    width: 85px;
+    height: 85px;
+  }
+  .compact .orbit-planet :global(.planet-svg--saturn) {
+    width: 105px;
+  }
+  .compact .cube-core {
+    width: 180px;
+    height: 180px;
+  }
+  .compact .core-label {
+    top: calc(50% + 80px);
+  }
+  @media (max-width: 650px) {
+    .orbit-scene,
+    .compact {
+      height: 390px;
+      width: calc(100% + 16px);
+      margin-left: -8px;
+    }
+    .orbit-planet {
+      width: 88px;
+    }
+    .orbit-planet :global(.planet-svg),
+    .compact .orbit-planet :global(.planet-svg) {
+      width: 64px;
+      height: 64px;
+    }
+    .orbit-planet :global(.planet-svg--saturn),
+    .compact .orbit-planet :global(.planet-svg--saturn) {
+      width: 79px;
+    }
+    .orbit-planet :global(.planet-link) {
+      font-size: 12px;
+      gap: 3px;
+    }
+    .planet-coordinate {
+      display: none;
+    }
+    .cube-core,
+    .compact .cube-core {
+      width: 124px;
+      height: 124px;
+    }
+    .core-label,
+    .compact .core-label {
+      font-size: 6px;
+      top: calc(50% + 56px);
+    }
+    .scene-caption {
+      font-size: 8px;
+      gap: 10px;
+    }
+    .scene-caption button {
+      font-size: 9px;
+      padding: 8px;
+    }
+    .scene-caption button span {
+      margin-left: 5px;
+    }
+  }
+</style>

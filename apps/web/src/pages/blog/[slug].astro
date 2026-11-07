@@ -1,14 +1,14 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
 // Tell Astro which blog slugs exist at build time
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
 
   return posts.map((post) => ({
     params: { slug: post.slug }, // maps to [slug]
-    props: { post },             // passes post into the component
+    props: { post }, // passes post into the component
   }));
 }
 
@@ -21,29 +21,32 @@ const { title, date, tags = [], description } = post.data;
 
 <BaseLayout
   title={`${title} — patrykopilka.me`}
-  description={description ?? ''}
+  description={description ?? ""}
 >
   <div class="blog-page">
     <article class="blog-article">
+      <p><a href="/blog">Back to all notes</a></p>
       <header class="blog-article-header">
         <p class="blog-eyebrow">Post</p>
         <h1 class="blog-article-title">{title}</h1>
         <p class="blog-item-meta">
-          {new Date(date).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: '2-digit',
-          })}
-          {tags.length > 0 && (
-            <>
-              {' · '}
-              <span>{tags.join(', ')}</span>
-            </>
-          )}
+          {
+            new Date(date).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+            })
+          }
+          {
+            tags.length > 0 && (
+              <>
+                {" · "}
+                <span>{tags.join(", ")}</span>
+              </>
+            )
+          }
         </p>
-        {description && (
-          <p class="blog-article-description">{description}</p>
-        )}
+        {description && <p class="blog-article-description">{description}</p>}
       </header>
 
       <div class="blog-article-body">
@@ -52,4 +55,3 @@ const { title, date, tags = [], description } = post.data;
     </article>
   </div>
 </BaseLayout>
-
