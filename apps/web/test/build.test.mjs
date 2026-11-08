@@ -80,3 +80,20 @@ test("homepage ships decorative static waves, no rays, and the MIT notice", () =
   assert.match(read("licenses/wodniack-waves.txt"), /Copyright \(c\) Antoine Wodniack/);
   assert.match(read("licenses/wodniack-waves.txt"), /Permission is hereby granted/);
 });
+
+test("homepage uses four distinct planets from the supplied pack", () => {
+  const home = read("index.html");
+  for (const variant of ["ice", "ringed", "forest", "mechanical"]) {
+    assert.equal((home.match(new RegExp(`planet-art--${variant}`, "g")) || []).length, 1);
+  }
+  const sprites = [...home.matchAll(/<image[^>]+href="([^"]+planet-pack[^\"]+\.webp)"/g)];
+  assert.equal(sprites.length, 4);
+  assert.equal(new Set(sprites.map((match) => match[1])).size, 1);
+  assert.doesNotMatch(home, /earthShade|venusShade|jupiterShade/);
+});
+
+test("About copy and description use the graduate-student title", () => {
+  const about = read("about/index.html");
+  assert.equal((about.match(/Computer Engineering graduate student @ NJIT/g) || []).length, 2);
+  for (const path of files) assert.doesNotMatch(read(path), /Computer Engineering student/);
+});
