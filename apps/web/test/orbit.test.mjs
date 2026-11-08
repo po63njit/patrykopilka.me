@@ -51,30 +51,13 @@ function setup(reduced = false) {
       sel === "[data-motion-toggle]" ? button : sel === "nav" ? nav : null,
   };
   const preference = { ...events(), matches: reduced };
-  let rayDraws = 0;
-  const rays = {
-    clientWidth: 1200,
-    clientHeight: 600,
-    getContext: () => ({
-      setTransform() {},
-      clearRect() {
-        rayDraws++;
-      },
-      beginPath() {},
-      moveTo() {},
-      lineTo() {},
-      stroke() {},
-    }),
-  };
   const document = {
     ...events(),
     hidden: false,
     querySelectorAll: (sel) =>
       sel === "[data-orbit-scene]"
         ? [scene]
-        : sel === "[data-rays]"
-          ? [rays]
-          : [],
+        : [],
     querySelector: (sel) =>
       sel === "[data-orbit-scene]"
         ? scene
@@ -113,7 +96,6 @@ function setup(reduced = false) {
     advance,
     emit,
     queue,
-    rayDraws: () => rayDraws,
   };
 }
 test("planets begin in separate quadrants and continue orbiting", () => {
@@ -165,7 +147,7 @@ test("hidden documents stop requesting frames", () => {
   s.document.hidden = false;
   s.emit("visibilitychange");
   s.advance(161);
-  assert.equal(s.queue.size, 2);
+  assert.equal(s.queue.size, 1);
 });
 
 test("pointer exit does not release a keyboard-focused planet", () => {
@@ -185,23 +167,20 @@ test("pointer exit does not release a keyboard-focused planet", () => {
   s.advance(321);
   assert.notEqual(JSON.stringify(s.positions), held);
 });
-test("pause stops both render loops and resume restarts rays", () => {
+test("pause stops the orbit render loop and resume restarts it", () => {
   const s = setup();
   s.emit("click");
   s.advance(81);
-  const draws = s.rayDraws();
   assert.equal(s.queue.size, 0);
   s.advance(161);
-  assert.equal(s.rayDraws(), draws);
   s.emit("click");
   s.advance(241);
-  assert.equal(s.queue.size, 2);
-  assert.ok(s.rayDraws() > draws);
+  assert.equal(s.queue.size, 1);
 });
 test("explicit resume can opt into motion with reduced-motion preference", () => {
   const s = setup(true);
   assert.equal(s.queue.size, 0);
   s.emit("click");
   s.advance(81);
-  assert.equal(s.queue.size, 2);
+  assert.equal(s.queue.size, 1);
 });

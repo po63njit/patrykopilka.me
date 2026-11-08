@@ -1,5 +1,6 @@
 ---
 import OrbitScene from "./OrbitScene.astro";
+import MatrixWaves from "./MatrixWaves.astro";
 import { getCollection } from "astro:content";
 const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
@@ -8,7 +9,7 @@ const post = posts[0];
 ---
 
 <section class="home home--orbital">
-  <canvas data-rays class="rays" aria-hidden="true"></canvas>
+  <MatrixWaves />
   <div class="home-heading">
     <p class="eyebrow">
       <span class="signal"></span> Computer engineering / Personal orbit
@@ -79,16 +80,6 @@ const post = posts[0];
     position: relative;
     isolation: isolate;
     padding-top: 54px;
-  }
-  .rays {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.75;
-    mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
   }
   .home-heading {
     text-align: center;

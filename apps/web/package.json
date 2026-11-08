@@ -7,9 +7,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test test/content.test.mjs test/orbit.test.mjs",
+    "test": "node --test test/content.test.mjs test/orbit.test.mjs test/matrix-waves.test.mjs",
     "test:build": "node --test test/build.test.mjs",
-    "check:orbit": "tsc --noEmit --strict --lib es2022,dom --target es2022 --module esnext --moduleResolution bundler --skipLibCheck src/scripts/orbit-scene.ts src/data/experience.ts"
+    "check:orbit": "tsc --noEmit --strict --lib es2022,dom --target es2022 --module esnext --moduleResolution bundler --skipLibCheck src/scripts/orbit-scene.ts src/data/experience.ts src/scripts/matrix-waves.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.10",
