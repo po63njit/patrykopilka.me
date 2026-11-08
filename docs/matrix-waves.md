@@ -24,7 +24,9 @@ The Pen was publicly readable and marked public on November 7, 2026. Its author 
 - The decorative SVG is hidden from assistive technology and cannot intercept links or focus.
 - Resize rebuilds paths without accumulation, and Astro swap cleanup disconnects listeners/observers.
 
-## Validation
+## Historical validation (Matrix-wave release)
+
+The results below describe the earlier wave release, not the current test count or a fresh audit. Use [validation.md](validation.md) for ongoing checks.
 
 Passed: production build, strict TypeScript (`check:orbit`), 25 source/unit tests, 5 production-output tests, and 3 API tests.
 Browser QA: desktop rendering, mobile 375px content area (390px frame with scrollbar), no horizontal overflow, all four orbit links in bounds, pause freezes wave paths, resume animates, and Projects navigation/Back retains the homepage. No application console errors were observed (an unrelated browser-extension metadata warning was present).
@@ -32,4 +34,4 @@ Reduced-motion, offscreen/hidden suspension, single-finger deformation, passive 
 
 A repeatable 96px horizontal finger swipe at 375px width produced a 117px peak bend, versus 32.3px with the prior touch settings (about 3.6 times the displacement in this simulated case). Regression tests assert a prominent bounded bend, complete settling after release, and finite displacement during rapid repeated gestures. Native scrolling and touch listener behavior are unchanged. This measurement is from simulated input, not a physical-phone test.
 
-Review screenshots are in `review/matrix-screenshots/`. The production build excludes the owner-private preview routes. See `docs/publication.md` for release and rollback checks.
+The production build excludes the review routes. See [publication.md](publication.md) for release and rollback checks. Review screenshots were local artifacts and are not included in this repository.

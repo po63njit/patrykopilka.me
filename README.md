@@ -1,62 +1,76 @@
-# patrykopilka-site (Astro + Cloudflare Workers/Hono)
+# patrykopilka.me
 
-Monorepo: **Astro** blog/portfolio (Pages) + **Hono** API (Workers).
+Personal portfolio and blog at **[patrykopilka.me](https://patrykopilka.me)**.
 
-## Getting Started
+The site is built with Astro 5, MDX, TypeScript, and Sass, then served as static files by Cloudflare Pages. A separate Hono/Cloudflare Worker provides a small example API. The website does not call or require that API.
 
-### Prerequisites
+## Run locally
 
-- Node.js 20+
-- npm 10+
-
-### Install dependencies
+Use Node.js 20 (the CI version) and npm 10+. Run commands from the repository root.
 
 ```bash
 npm ci
-```
-
-### Run the web app (Astro)
-
-```bash
 npm run dev:web
 ```
 
-The web app runs from `apps/web`.
+Open the local URL printed by Astro, normally `http://localhost:4321`. No account, API key, or environment file is required for the website.
 
-### Run the API (Cloudflare Workers + Hono)
+To build and preview production output:
 
 ```bash
-npm run dev:api
+npm run build:web
+npm --workspace web run preview
 ```
 
-The API runs from `apps/api` using Wrangler.
+Astro writes the static site to `apps/web/dist/`. Preview serves that build; rebuild after editing source.
 
-### Build and test
+## Repository map
+
+```text
+apps/web/
+  src/pages/          Routes: home, about, projects, resume, blog
+  src/components/     Page sections, orbiting planets, wave background
+  src/layouts/        Shared navigation, metadata, and footer
+  src/content/blog/   Markdown/MDX posts
+  src/data/           Structured experience content
+  src/scripts/        Orbit and wave interactions
+  src/styles/         Shared Sass styles
+  src/assets/         Build-processed images, including the planet pack
+  public/             Files copied unchanged, including license notices
+  test/               Source/unit and generated-site checks
+apps/api/             Hono routes, Durable Object, Wrangler config, tests
+packages/             Reserved lib/ui folders; currently placeholders
+docs/                Content, validation, deployment, and design guides
+```
+
+## Check a change
+
+These are the checks run by [GitHub Actions](.github/workflows/ci.yml), in order:
 
 ```bash
-ASTRO_TELEMETRY_DISABLED=1 npm run build:web
 npm --workspace web test
 npm --workspace web run check:orbit
+npm run build:web
 npm --workspace web run test:build
 npm --workspace api test
 ```
 
-The static site is generated in `apps/web/dist`. The portfolio does not need the API to render or navigate.
+Run the build before `test:build`. CI sets `ASTRO_TELEMETRY_DISABLED=1`; this is optional locally. There is no root `npm test`, full Astro diagnostic, or lint script. See [validation](docs/validation.md) for coverage and browser checks.
 
-### Deployment
+## Configuration and optional API
 
-The repository's existing Cloudflare Pages integration builds the web app. GitHub Actions validates the build and tests; it does not deploy the API. Keep the existing Pages project and custom domain configuration. See [the publication checklist](docs/publication.md) for validation and rollback steps.
+- **Canonical domain:** `apps/web/astro.config.mjs` defaults to `https://patrykopilka.me`. Its `import.meta.env.PUBLIC_SITE_URL` expression currently does not pick up shell or `.env` overrides during the build. To change domains, update the config's `site` value and the production-output tests together, or implement explicit environment loading first.
+- `ASTRO_TELEMETRY_DISABLED=1`: disables Astro telemetry; it does not change site content.
+- `COUNTER_DO`: a Worker binding configured in `apps/api/wrangler.toml`, not an `.env` string. No `PUBLIC_API_BASE` variable is used by the current website.
 
-### Content
+Run `npm run dev:api` in a second terminal only when working on the API. Wrangler prints its local URL, normally `http://localhost:8787`. `GET /health` returns service status, `POST /echo` returns submitted JSON (or `{}` for invalid JSON), and `GET /counter` increments a shared Durable Object counter. See [API deployment notes](docs/publication.md#optional-api) before deploying it.
 
-- The homepage uses the Orbital design with a Matrix-green SVG wave backdrop; About uses Systems profile.
-- Wave attribution and the MIT notice ship at `/licenses/wodniack-waves.txt`. See `docs/matrix-waves.md` for source and behavior details.
-- The résumé intentionally contains only the approved IBM summary and start date in `apps/web/src/data/experience.ts`.
-- Projects are placeholders. The prior project data and UI are preserved in `docs/archive/projects-before-cleanup.astro.txt` and Git history.
-- Blog posts live in `apps/web/src/content/blog`. A post with `draft: true` is excluded from the site, but its source is still public if committed to this public repository.
+## Guides
 
-### Durable Object notes
+- [Edit pages, images, and blog posts](docs/content.md)
+- [Validate a change](docs/validation.md)
+- [Deploy and roll back](docs/publication.md)
+- [Wave behavior and attribution](docs/matrix-waves.md)
+- [Documentation index and historical notes](docs/README.md)
 
-- The API uses a Durable Object binding named `COUNTER_DO`.
-- `apps/api/wrangler.toml` already contains the binding and migration config for local/dev deployment.
-- The `/counter` route depends on this Durable Object to persist and increment the counter.
+Keep secrets, private drafts, and confidential work details out of this public repository. Files under `docs/` are public too, even though they are not included in the website build.

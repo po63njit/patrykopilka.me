@@ -1,5 +1,7 @@
 # Codebase Issue Task Proposals
 
+> Historical proposals from an earlier version of the site, not a current backlog. Copy, résumé, API tests, and configuration have changed since these notes. Use the [current README](../README.md) and [maintainer guides](README.md); the current website does not use `PUBLIC_API_BASE`.
+
 ## 1) Typo task: fix homepage/blog banner copy typo
 
 **Issue found**
