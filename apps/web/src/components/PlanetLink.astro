@@ -1,0 +1,45 @@
+---
+import { getImage } from "astro:assets";
+import planetPack from "../assets/planet-pack.png";
+
+interface Props {
+  href: string;
+  label: string;
+  variant: "ice" | "forest" | "ringed" | "mechanical";
+}
+const { href, label, variant } = Astro.props;
+const sprite = await getImage({ src: planetPack, format: "webp", quality: 90 });
+// Viewports into the user's original transparent 4 × 3 planet pack.
+// The ring extends beyond its grid cell, so keep both tips in a wider viewport.
+const viewports = {
+  ice: "362 0 362 362",
+  forest: "0 362 362 362",
+  ringed: "694 366 414 344",
+  mechanical: "724 724 362 362",
+};
+const clipId = `planet-${variant}-clip`;
+---
+
+<a href={href} class="planet-link">
+  <svg
+    viewBox={viewports[variant]}
+    class={`planet-art planet-art--${variant}`}
+    aria-hidden="true"
+    focusable="false"
+  >
+    {variant === "ringed" && (
+      <defs>
+        <clipPath id={clipId}>
+          <path d="M752 395H1042V412H1108V495L1075 541V705H755V663H694V588L729 549Z" />
+        </clipPath>
+      </defs>
+    )}
+    <image
+      href={sprite.src}
+      width={planetPack.width}
+      height={planetPack.height}
+      clip-path={variant === "ringed" ? `url(#${clipId})` : undefined}
+    />
+  </svg>
+  <span>{label}</span>
+</a>

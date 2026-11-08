@@ -1,5 +1,5 @@
 ---
-import SaturnLink from "./SaturnLink.astro";
+import PlanetLink from "./PlanetLink.astro";
 const { compact = false } = Astro.props;
 ---
 
@@ -33,22 +33,22 @@ const { compact = false } = Astro.props;
   </div>
   <nav class="planet-nav" aria-label="Explore the site with orbiting planets">
     <div class="orbit-planet" data-angle="225" style="--x:-25%;--y:-24%">
-      <SaturnLink href="/blog" label="Writing" variant="earth" /><span
+      <PlanetLink href="/blog" label="Writing" variant="ice" /><span
         class="planet-coordinate"
         aria-hidden="true">01 / FIELD NOTES</span>
     </div>
     <div class="orbit-planet" data-angle="315" style="--x:25%;--y:-24%">
-      <SaturnLink href="/resume" label="Résumé" variant="venus" /><span
+      <PlanetLink href="/resume" label="Résumé" variant="ringed" /><span
         class="planet-coordinate"
         aria-hidden="true">02 / EXPERIENCE</span>
     </div>
     <div class="orbit-planet" data-angle="135" style="--x:-25%;--y:24%">
-      <SaturnLink href="/about" label="About" variant="saturn" /><span
+      <PlanetLink href="/about" label="About" variant="forest" /><span
         class="planet-coordinate"
         aria-hidden="true">03 / THE HUMAN</span>
     </div>
     <div class="orbit-planet" data-angle="45" style="--x:25%;--y:24%">
-      <SaturnLink href="/projects" label="Projects" variant="jupiter" /><span
+      <PlanetLink href="/projects" label="Projects" variant="mechanical" /><span
         class="planet-coordinate"
         aria-hidden="true">04 / WORK IN PROGRESS</span>
     </div>
@@ -154,45 +154,22 @@ const { compact = false } = Astro.props;
     color: var(--fg);
     border-radius: 4px;
   }
-  .orbit-planet :global(.planet-svg) {
+  .orbit-planet :global(.planet-art) {
     width: 100px;
     height: 100px;
-    overflow: visible;
+    overflow: hidden;
     transition:
       filter 0.2s,
       transform 0.2s;
     filter: drop-shadow(0 8px 20px #0008);
   }
-  .orbit-planet :global(.planet-link:hover .planet-svg),
-  .orbit-planet :global(.planet-link:focus-visible .planet-svg) {
+  .orbit-planet :global(.planet-link:hover .planet-art),
+  .orbit-planet :global(.planet-link:focus-visible .planet-art) {
     filter: drop-shadow(0 0 16px #a7f3d055);
     transform: scale(1.06);
   }
-  .orbit-planet :global(.planet-svg--saturn) {
+  .orbit-planet :global(.planet-art--ringed) {
     width: 118px;
-  }
-  .orbit-planet :global(.planet-body circle) {
-    fill: #a9c3ec;
-  }
-  .orbit-planet :global(.planet-body path) {
-    fill: #839fda;
-  }
-  .orbit-planet :global(.belt-front path),
-  .orbit-planet :global(.belt-back path) {
-    fill: #efbcb8;
-  }
-  .orbit-planet :global(.stars-front path),
-  .orbit-planet :global(.stars-back path) {
-    fill: #f4eee6;
-  }
-  .orbit-planet :global(.clouds ellipse) {
-    fill: #e7f7ffe6;
-  }
-  .orbit-planet :global(.venus-clouds path) {
-    fill: #ffd6ba;
-  }
-  .orbit-planet :global(.jupiter-clouds path) {
-    fill: #ffe5cf;
   }
   .planet-coordinate {
     display: block;
@@ -242,11 +219,11 @@ const { compact = false } = Astro.props;
   .compact .orbit-planet {
     width: 120px;
   }
-  .compact .orbit-planet :global(.planet-svg) {
+  .compact .orbit-planet :global(.planet-art) {
     width: 85px;
     height: 85px;
   }
-  .compact .orbit-planet :global(.planet-svg--saturn) {
+  .compact .orbit-planet :global(.planet-art--ringed) {
     width: 105px;
   }
   .compact .cube-core {
@@ -266,13 +243,13 @@ const { compact = false } = Astro.props;
     .orbit-planet {
       width: 88px;
     }
-    .orbit-planet :global(.planet-svg),
-    .compact .orbit-planet :global(.planet-svg) {
+    .orbit-planet :global(.planet-art),
+    .compact .orbit-planet :global(.planet-art) {
       width: 64px;
       height: 64px;
     }
-    .orbit-planet :global(.planet-svg--saturn),
-    .compact .orbit-planet :global(.planet-svg--saturn) {
+    .orbit-planet :global(.planet-art--ringed),
+    .compact .orbit-planet :global(.planet-art--ringed) {
       width: 79px;
     }
     .orbit-planet :global(.planet-link) {
