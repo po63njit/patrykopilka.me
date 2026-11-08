@@ -71,3 +71,12 @@ test("existing blog post is discoverable on the homepage and blog index", () => 
     assert.match(read(path), /href="\/blog\/hello-world"/);
   }
 });
+
+test("homepage ships decorative static waves, no rays, and the MIT notice", () => {
+  const home = read("index.html");
+  assert.match(home, /data-matrix-waves aria-hidden="true"/);
+  assert.match(home, /viewBox="0 0 1200 800"/);
+  assert.doesNotMatch(home, /data-rays/);
+  assert.match(read("licenses/wodniack-waves.txt"), /Copyright \(c\) Antoine Wodniack/);
+  assert.match(read("licenses/wodniack-waves.txt"), /Permission is hereby granted/);
+});

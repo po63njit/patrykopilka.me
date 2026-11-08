@@ -49,7 +49,8 @@ The repository's existing Cloudflare Pages integration builds the web app. GitHu
 
 ### Content
 
-- The homepage uses the Orbital design and About uses Systems profile.
+- The homepage uses the Orbital design with a Matrix-green SVG wave backdrop; About uses Systems profile.
+- Wave attribution and the MIT notice ship at `/licenses/wodniack-waves.txt`. See `docs/matrix-waves.md` for source and behavior details.
 - The résumé intentionally contains only the approved IBM summary and start date in `apps/web/src/data/experience.ts`.
 - Projects are placeholders. The prior project data and UI are preserved in `docs/archive/projects-before-cleanup.astro.txt` and Git history.
 - Blog posts live in `apps/web/src/content/blog`. A post with `draft: true` is excluded from the site, but its source is still public if committed to this public repository.
