@@ -4,9 +4,9 @@ Run the ordered commands in the [README](../README.md#check-a-change). The [CI w
 
 ## What the checks cover
 
-- `web test`: approved content, selected page designs, orbit controls, focus/reduced-motion behavior, and wave interaction simulations.
-- `web run check:orbit`: strict TypeScript checks for the two interaction scripts and experience data. This is **not** a full Astro project check.
-- `build:web`: content schema validation, Astro compilation, static routes, and processed assets.
+- `web test`: approved content, selected page designs, orbit controls, focus/reduced-motion behavior, wave interaction simulations, byte-lab parsing, and private-content boundary checks.
+- `web run check:orbit`: strict TypeScript checks for the interaction scripts and experience data. This is **not** a full Astro project check.
+- `build:web`: private-content preparation, content schema validation, Astro compilation, static routes, and processed assets.
 - `web run test:build`: generated route list, headings/IDs, internal page links/assets, canonical URLs, selected content, planet artwork, and the bundled wave license.
 - `api test`: TypeScript compilation and Hono route tests. The Durable Object binding is mocked; these tests do not verify real Cloudflare persistence, concurrency, or deployment.
 
@@ -27,6 +27,6 @@ Report the commit, commands, and browser/device coverage actually tested. Keep r
 ## Common failures
 
 - **`test:build` cannot find `dist/` or sees old content:** run `npm run build:web` first.
-- **A new post fails the route/latest-post tests:** update the explicit expectations described in [content editing](content.md#when-content-tests-need-updating).
+- **A new post fails the route/latest-post tests:** set `BLOG_EXPECT_ARTICLES` as described in [private article publishing](private-articles.md).
 - **Canonical URL assertion fails:** check the `site` value in `apps/web/astro.config.mjs` and the expected domain in `test/build.test.mjs`. The current config does not load `PUBLIC_SITE_URL` overrides from shell or `.env`.
 - **Astro reports legacy content collections:** the repository currently uses `src/content/config.ts`. Migration is separate work; do not change the schema just to hide a warning.

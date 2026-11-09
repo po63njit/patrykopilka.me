@@ -13,7 +13,7 @@ npm ci
 npm run dev:web
 ```
 
-Open the local URL printed by Astro, normally `http://localhost:4321`. No account, API key, or environment file is required for the website.
+Open the local URL printed by Astro, normally `http://localhost:4321`. No account, API key, or environment file is required to develop the public theme. New article manuscripts are kept in a separate private repository; see [private article publishing](docs/private-articles.md) to include them locally or configure production.
 
 To build and preview production output:
 
@@ -31,9 +31,9 @@ apps/web/
   src/pages/          Routes: home, about, projects, resume, blog
   src/components/     Page sections, orbiting planets, wave background
   src/layouts/        Shared navigation, metadata, and footer
-  src/content/blog/   Markdown/MDX posts
+  src/content/blog/   Public note and ignored generated private articles
   src/data/           Structured experience content
-  src/scripts/        Orbit and wave interactions
+  src/scripts/        Orbit, wave and byte-lab interactions
   src/styles/         Shared Sass styles
   src/assets/         Build-processed images, including the planet pack
   public/             Files copied unchanged, including license notices
@@ -68,6 +68,7 @@ Run `npm run dev:api` in a second terminal only when working on the API. Wrangle
 ## Guides
 
 - [Edit pages, images, and blog posts](docs/content.md)
+- [Keep article source private](docs/private-articles.md)
 - [Validate a change](docs/validation.md)
 - [Deploy and roll back](docs/publication.md)
 - [Wave behavior and attribution](docs/matrix-waves.md)
