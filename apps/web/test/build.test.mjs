@@ -108,3 +108,17 @@ test("public output never includes raw article manuscripts or design controls", 
     assert.match(read(path), /class="ledger-blog"/);
   }
 });
+
+test("numbered article headings have a separator without changing their anchors", () => {
+  for (const path of files.filter(path => path.startsWith("blog/"))) {
+    const html = read(path);
+    for (const [, attributes, content] of html.matchAll(/<h2\b([^>]*)>([\s\S]*?)<\/h2>/g)) {
+      const text = content.replace(/<[^>]*>/g, "").trim();
+      if (!/^\d+(?:[:.)]|\s)/.test(text)) continue;
+      assert.match(text, /^\d+[:.)]\s+\S/, `${path}: section number needs a separator`);
+      const id = /\bid="([^"]+)"/.exec(attributes)?.[1];
+      assert.ok(id, `${path}: section anchor is missing`);
+      assert.match(html, new RegExp(`href="#${id}"`), `${path}: section link is missing`);
+    }
+  }
+});
