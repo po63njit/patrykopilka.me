@@ -1,149 +1,18 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogLayout from "../../layouts/BlogLayout.astro";
 import { getCollection } from "astro:content";
-const posts = (await getCollection("blog"))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const posts=(await getCollection("blog",({data})=>!data.draft)).sort((a,b)=>b.data.date.getTime()-a.data.date.getTime());
+const [featured,...older]=posts;
 ---
-
-<BaseLayout
-  title="Writing — Patryk Opilka"
-  description="Notes, questions, and experiments from Patryk Opilka."
->
-  <section class="writing-header">
-    <p class="eyebrow">Field notes / The blog</p><h1>
-      Following<br /><em>the interesting bits.</em>
-    </h1><p>
-      Things I’m learning, questions I’m working through, and ideas worth
-      keeping.
-    </p>
-  </section>
-  <section class="post-list" aria-label="All published posts">
-    <header><h2>All notes</h2><span>{posts.length} published</span></header>{
-      posts.length ? (
-        posts.map((post, index) => (
-          <article>
-            <>
-              <span class="post-number" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3>
-                  <a href={`/blog/${post.slug}`}>
-                    {post.data.title}
-                    <span class="arrow-icon" aria-hidden="true" />
-                  </a>
-                </h3>
-                {post.data.description && <p>{post.data.description}</p>}
-                <time datetime={post.data.date.toISOString()}>
-                  {post.data.date.toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                    timeZone: "UTC",
-                  })}
-                </time>
-              </div>
-            </>
-          </article>
-        ))
-      ) : (
-        <p class="empty">Nothing published yet. A quiet place to begin.</p>
-      )
-    }
-  </section>
-</BaseLayout>
-<style>
-  .writing-header {
-    padding: 72px 0 52px;
-  }
-  .writing-header h1 {
-    font-size: clamp(3rem, 6.6vw, 5.5rem);
-    margin: 24px 0;
-    line-height: 1.05;
-  }
-  .writing-header h1 em {
-    font-family: Georgia, serif;
-    color: var(--accent);
-    font-weight: 400;
-  }
-  .writing-header > p:last-child {
-    color: var(--muted);
-    max-width: 440px;
-    font-size: 15px;
-  }
-  .post-list {
-    margin: 0 0 90px;
-  }
-  .post-list > header {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 18px;
-    align-items: center;
-  }
-  .post-list > header h2 {
-    font-size: 18px;
-    letter-spacing: -0.02em;
-    margin: 0;
-  }
-  .post-list > header > span {
-    font: 10px var(--mono);
-    color: var(--muted);
-  }
-  article {
-    display: grid;
-    grid-template-columns: 90px 1fr;
-    gap: 24px;
-    padding: 34px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .post-number {
-    font: 12px var(--mono);
-    color: #729185;
-    padding-top: 5px;
-  }
-  article h3 {
-    font-size: 30px;
-    margin: 14px 0;
-  }
-  article h3 a {
-    display: flex;
-    justify-content: space-between;
-    text-decoration: none;
-  }
-  article h3 a span {
-    font-weight: 300;
-    color: var(--accent);
-  }
-  article .eyebrow {
-    font-size: 9px;
-  }
-  article p:not(.eyebrow) {
-    color: var(--muted);
-    font-size: 14px;
-  }
-  time {
-    font: 11px var(--mono);
-    color: var(--muted);
-  }
-  .empty {
-    padding: 30px 0;
-    color: var(--muted);
-  }
-  @media (max-width: 650px) {
-    .writing-header {
-      padding: 42px 0 30px;
-    }
-    .writing-header h1 {
-      font-size: 3.2rem;
-    }
-    article {
-      grid-template-columns: 25px 1fr;
-      gap: 16px;
-    }
-    article h3 {
-      font-size: 27px;
-    }
-  }
-</style>
+<BlogLayout>
+  <section class="journal-intro"><p class="eyebrow">NOTES FROM CLOSE TO THE METAL</p><h1>Small details.<br /><em>Deep systems.</em></h1><div class="journal-bottom"><p>Essays on how computers work.<br />From individual bytes to the boundaries between systems.</p><span class="journal-index">THE JOURNAL<br />{posts.length} {posts.length===1?"ARTICLE":"ARTICLES"}</span></div></section>
+  {featured ? <>
+    <div class="section-label"><span>LATEST ARTICLE</span><span>SYSTEMS · FIELD NOTES</span></div>
+    <a class="featured-article" href={`/blog/${featured.slug}`}>
+      <div class="featured-art" aria-hidden="true"><span class="art-small">ADDRESS →</span><div class="featured-bytes"><b>12</b><b>34</b><b>56</b><b>78</b></div><div class="featured-bytes reversed"><b>78</b><b>56</b><b>34</b><b>12</b></div><span class="art-small bottom">SAME VALUE. DIFFERENT ORDER.</span></div>
+      <div class="featured-copy"><p class="eyebrow">{featured.data.tags.join(" / ")}</p><h2>{featured.data.hero?`${featured.data.hero.titleLines.join("")}.`:featured.data.title}</h2><p>{featured.data.description??"Notes, questions, and experiments."}</p><span class="read-link">Explore the article <span>↗</span></span><time class="draft-note" datetime={featured.data.date.toISOString()}>{featured.data.date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",timeZone:"UTC"})}</time></div>
+    </a>
+    {older.length>0 && <section class="older-posts" aria-label="Earlier articles"><div class="section-label"><span>EARLIER NOTES</span><span>{older.length}</span></div>{older.map(post=><article><h2><a href={`/blog/${post.slug}`}>{post.data.title} <span aria-hidden="true">↗</span></a></h2>{post.data.description&&<p>{post.data.description}</p>}<time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",timeZone:"UTC"})}</time></article>)}</section>}
+  </> : <p class="empty">Nothing published yet. A quiet place to begin.</p>}
+  <div class="journal-note"><span aria-hidden="true">⌁</span><p>A place for careful explanations,<br />reproducible examples, and questions worth following.</p><a href="/">Back to the portfolio ↗</a></div>
+</BlogLayout>

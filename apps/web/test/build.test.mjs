@@ -10,15 +10,17 @@ const files = readdirSync(dist, { recursive: true }).filter((p) =>
 );
 const read = (p) => readFileSync(resolve(dist, p), "utf8");
 
-test("production output has six pages and no review interface", () => {
+test("production output has expected published pages and no review interface", () => {
+  const articlePages = process.env.BLOG_EXPECT_ARTICLES ? process.env.BLOG_EXPECT_ARTICLES.split(",").map(slug => `blog/${slug}/index.html`) : [];
   assert.deepEqual(files.sort(), [
+    ...articlePages,
     "about/index.html",
     "blog/hello-world/index.html",
     "blog/index.html",
     "index.html",
     "projects/index.html",
     "resume/index.html",
-  ]);
+  ].sort());
   for (const path of files) {
     const html = read(path);
     assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, path);
@@ -62,14 +64,13 @@ test("rendered IBM entry is limited to the approved sentence and start date", ()
     /Experience in IBM Z I\/O enablement, with a technical focus on PCIe bring-up and Linux on s390x\./,
   );
   assert.match(resume, /datetime="2026-05-18"[^>]*>May 18, 2026<\/time>/);
-  for (const path of files)
+  for (const path of ["resume/index.html", "about/index.html", "index.html"])
     assert.doesNotMatch(read(path), /DMA|VFIO|IOMMU|\[Role title\]|\[Dates\]/);
 });
 
 test("existing blog post is discoverable on the homepage and blog index", () => {
-  for (const path of ["index.html", "blog/index.html"]) {
-    assert.match(read(path), /href="\/blog\/hello-world"/);
-  }
+  assert.match(read("blog/index.html"), /href="\/blog\/hello-world"/);
+  assert.match(read("index.html"), /href="\/blog\/[^"]+"/);
 });
 
 test("homepage ships decorative static waves, no rays, and the MIT notice", () => {
@@ -96,4 +97,14 @@ test("About copy and description use the graduate-student title", () => {
   const about = read("about/index.html");
   assert.equal((about.match(/Computer Engineering graduate student @ NJIT/g) || []).length, 2);
   for (const path of files) assert.doesNotMatch(read(path), /Computer Engineering student/);
+});
+
+
+test("public output never includes raw article manuscripts or design controls", () => {
+  const output = readdirSync(dist, { recursive: true });
+  assert.equal(output.some(path => /\.(?:md|mdx)$/.test(path)), false);
+  for (const path of files.filter(path => path.startsWith('blog/'))) {
+    assert.doesNotMatch(read(path), /Markdown source|source\.md|Choose a typeface|Grain slider/);
+    assert.match(read(path), /class="ledger-blog"/);
+  }
 });

@@ -29,3 +29,6 @@ apps/api/.test-dist/
 # Local visual review output
 review/
 .openai/
+
+# Private articles are fetched only during an authorized build.
+apps/web/src/content/blog/private/

@@ -17,7 +17,7 @@ The GitHub `ci` workflow validates the code; it does not deploy the API. Cloudfl
 4. After review and approval, merge to `main`. This triggers production publishing through the existing integration, including for documentation-only merges unless hosting build filters say otherwise.
 5. Verify the checks for the merged commit, then smoke-test the live domain, navigation, blog, motion controls, assets, and license notice. Do not rely only on a green build.
 
-Website-only changes do not require `deploy:api`, new credentials, or DNS changes.
+Website-only changes do not require `deploy:api` or DNS changes. This private-article integration additionally needs the approved production-only read credential described in [private article publishing](private-articles.md). Do not merge its first release before verifying that configuration. Public PR previews intentionally omit private manuscripts; review the full article locally or in an owner-private review site.
 
 ## Roll back
 

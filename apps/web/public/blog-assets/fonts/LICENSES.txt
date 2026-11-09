@@ -1,0 +1,11 @@
+Self-hosted blog fonts
+
+All bundled font families use SIL Open Font License 1.1. Family-specific notices are included beside each font:
+
+bodonimoda: bodonimoda-OFL.txt
+lora: lora-OFL.txt
+ibmplexsans: ibmplexsans-OFL.txt
+ibmplexmono: ibmplexmono-OFL.txt
+barlowcondensed: barlowcondensed-OFL.txt
+
+Unmodified Latin WOFF2 subsets from the official Google Fonts CSS API and fonts.gstatic.com. Font-family licenses from https://github.com/google/fonts/tree/main/ofl/ .

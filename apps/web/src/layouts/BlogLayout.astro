@@ -1,0 +1,33 @@
+---
+import "../styles/ledger-blog.css";
+const { title = "Journal — Patryk Opilka", description = "Independent technical writing about computers, from memory bytes to systems boundaries." } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const links = [{url:"/blog",label:"Journal"},{url:"/",label:"Portfolio"},{url:"/projects",label:"Projects"},{url:"/resume",label:"Résumé"},{url:"/about",label:"About"}];
+---
+<!doctype html>
+<html lang="en" class="ledger-blog">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/blog-assets/fonts/fonts.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="progress-track" aria-hidden="true"><span id="reading-progress"></span></div>
+    <div class="site-shell">
+      <header class="site-header">
+        <a href="/blog" class="brand" aria-label="Patryk Opilka journal"><span class="brand-symbol" aria-hidden="true">p/</span><span>Patryk Opilka<span class="brand-caption">AN INDEPENDENT TECHNICAL JOURNAL</span></span></a>
+        <nav aria-label="Main navigation">{links.map(link=><a href={link.url} aria-current={link.url==="/blog"?"page":undefined}>{link.label}</a>)}</nav>
+      </header>
+      <main id="main"><slot /></main>
+      <footer class="site-footer"><a href="/">Patryk Opilka</a><span>INDEPENDENT TECHNICAL WRITING</span><a href="/blog-assets/fonts/LICENSES.txt">Font licenses</a><a href="#main">Back to top ↑</a></footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script>import "../scripts/ledger-blog";</script>
+  </body>
+</html>
