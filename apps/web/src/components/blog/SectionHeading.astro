@@ -1,0 +1,7 @@
+---
+// Preserve the generated anchor and inline markup while separating a section
+// number from its title. Existing punctuation and unnumbered headings stay put.
+const content = await Astro.slots.render("default");
+const heading = content.replace(/^(\s*\d+)(?=\s+\S)/, "$1:");
+---
+<h2 {...Astro.props} set:html={heading} />
