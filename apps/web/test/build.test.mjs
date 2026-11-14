@@ -69,8 +69,8 @@ test("rendered IBM entry is limited to the approved sentence and start date", ()
 });
 
 test("existing blog post is discoverable on the homepage and blog index", () => {
-  assert.match(read("blog/index.html"), /href="\/blog\/hello-world"/);
-  assert.match(read("index.html"), /href="\/blog\/[^"]+"/);
+  assert.match(read("blog/index.html"), /href="\/blog\/hello-world\/"/);
+  assert.match(read("index.html"), /href="\/blog\/[^"]+\/"/);
 });
 
 test("homepage ships decorative static waves, no rays, and the MIT notice", () => {
@@ -120,5 +120,22 @@ test("numbered article headings use periods without changing their anchors", () 
       assert.ok(id, `${path}: section anchor is missing`);
       assert.match(html, new RegExp(`href="#${id}"`), `${path}: section link is missing`);
     }
+  }
+});
+
+test("rendered portfolio and journal navigation use direct directory URLs", () => {
+  for (const path of files) {
+    const html = read(path);
+    for (const [, href] of html.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)) {
+      if (!/^\/(?:about|projects|resume|blog)(?:\/|[?#]|$)/.test(href)) continue;
+      assert.match(href.split(/[?#]/)[0], /\/$/, `${path}: noncanonical link ${href}`);
+    }
+  }
+  for (const section of ["about", "projects", "resume", "blog"]) {
+    assert.match(read(`${section}/index.html`), new RegExp(`href="/${section}/" aria-current="page"`));
+  }
+  if (files.includes("blog/endianness/index.html")) {
+    for (const page of ["index.html", "blog/index.html"])
+      assert.match(read(page), /href="\/blog\/endianness\/"/);
   }
 });

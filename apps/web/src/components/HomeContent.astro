@@ -36,7 +36,7 @@ const post = posts[0];
       Always a little unfinished.
     </p>
   </div>
-  <a href="/projects" class="bottom-link">
+  <a href="/projects/" class="bottom-link">
     <span class="eyebrow">The workbench</span>
     <h2>
       Projects in progress <span class="arrow-icon" aria-hidden="true"></span>
@@ -44,7 +44,7 @@ const post = posts[0];
     <p>Making room for work worth sharing.</p>
   </a>
   {post ? (
-    <a href={`/blog/${post.slug}`} class="bottom-link">
+    <a href={`/blog/${post.slug}/`} class="bottom-link">
       <>
         <span class="eyebrow">Latest field note</span>
         <h2>
@@ -64,7 +64,7 @@ const post = posts[0];
       </>
     </a>
   ) : (
-    <a href="/blog" class="bottom-link">
+    <a href="/blog/" class="bottom-link">
       <>
         <span class="eyebrow">Field notes</span>
         <h2>
