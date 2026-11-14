@@ -21,10 +21,10 @@ const dateLabel=post.data.date.toLocaleDateString("en-US",{month:"long",day:"num
   <div class:list={["reading-layout",{"without-outline":outline.length===0}]}>
     {outline.length>0 && <aside class="contents"><p class="eyebrow">ON THIS PAGE</p><nav aria-label="Article sections">{outline.map((h,i)=><><a href={`#${h.slug}`}><span>{String(i).padStart(2,"0")}</span>{h.text.replace(/^\d+\s+/,"")}</a>{byteOrder&&i===1&&<a href="#byte-lab"><span>↔</span>Interactive byte lab</a>}</>)}</nav><p class="toc-footer">FOLLOW THE DETAILS.<br />QUESTION THE BOUNDARIES.</p></aside>}
     <article class="article-body" aria-label={post.data.title}>
-      {byteOrder&&<div class="reading-mode"><span>{outline.filter(h=>/^\d+ /.test(h.text)).length} CHAPTERS{hero?.status&&` · ${hero.status}`}</span><a href="/blog">All articles ↗</a></div>}
+      {byteOrder&&<div class="reading-mode"><span>{outline.filter(h=>/^\d+ /.test(h.text)).length} CHAPTERS{hero?.status&&` · ${hero.status}`}</span><a href="/blog/">All articles ↗</a></div>}
       <Content components={{ h2: SectionHeading }} />
 
-      <p class="back-link"><a href="/blog">← Back to the journal</a></p>
+      <p class="back-link"><a href="/blog/">← Back to the journal</a></p>
     </article>
   </div>
 </BlogLayout>

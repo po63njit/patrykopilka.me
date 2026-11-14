@@ -7,10 +7,10 @@ const {
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site);
 const links = [
-  { url: "/blog", label: "Writing" },
-  { url: "/projects", label: "Projects" },
-  { url: "/resume", label: "Résumé" },
-  { url: "/about", label: "About" },
+  { url: "/blog/", label: "Writing" },
+  { url: "/projects/", label: "Projects" },
+  { url: "/resume/", label: "Résumé" },
+  { url: "/about/", label: "About" },
 ];
 ---
 
@@ -41,7 +41,7 @@ const links = [
         {links.map((link) => (
           <a
             href={link.url}
-            aria-current={path.startsWith(link.url) ? "page" : undefined}
+            aria-current={path === link.url || `${path}/` === link.url ? "page" : undefined}
           >
             {link.label}
           </a>
